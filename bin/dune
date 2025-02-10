@@ -1,0 +1,4 @@
+(executable
+ (public_name Icgt25)
+ (name main)
+ (libraries Icgt25))

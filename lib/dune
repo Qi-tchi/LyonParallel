@@ -1,0 +1,13 @@
+(library
+ (name Icgt25)
+ (libraries   
+ batteries
+ domainslib
+ atomic
+ z3
+ core
+ ) 
+  (preprocess
+  (pps ppx_inline_test ppx_expect))
+ (inline_tests)
+)
