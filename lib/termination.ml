@@ -98,7 +98,7 @@ let calculateDXR rl x =
   let r = Grs.rhs rl in
   let rightGraph = Grs.rightGraph rl in
   let interfaceGraph = Grs.interfaceGraph rl in
-  (* calculate all possible (r',k') *)
+  (* calculate all possible (r',k') *) 
   let r's = MGraph.propreSubgraphs x in
   (* let r's = List.filter (fun sg -> MGraph.isSingleton sg |> not) r's in *)
   let k'r's = List.map 
