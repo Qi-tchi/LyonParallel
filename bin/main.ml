@@ -196,7 +196,68 @@ let handle_command cmd =
   | ["recap"] -> `recap 
   | ["help"] ->
     `Print_help_msg 
-    ""
+    "GRAPH REWRITING SYSTEM TERMINATION PROVER (REPL)
+───────────────────────────────────────────────────
+
+CORE COMMANDS
+  systems               - List all available graph rewriting systems
+  select <N>            - Select system by ID (e.g., `select 0`)
+  run                   - Execute added strategies on the selected system
+  recap                 - Show system status, rules left, and strategies used
+  reset_strategies      - Clear all selected strategies
+  timeout <SECONDS>     - Set max execution time (e.g., `timeout 60`)
+  showme                - Display the latest termination certificate
+  exit                  - Quit the REPL
+
+STRATEGY COMMANDS
+Add automated strategies for proving termination:
+
+1. Predefined Strategies (Shortcuts):
+   add_parallel_strategy_auto:<NAME>
+   ────────────────────────────────────────
+   Auto_total                 - Fully automatic strategy
+   Auto_total_int             - Integer coefficients (auto semiring)
+   Auto_total_int_arctic      - Integer + Arctic semiring
+   Auto_total_int_tropical    - Integer + Tropical semiring
+   Auto_total_int_arithmetic  - Integer + Arithmetic semiring
+   Auto_total_real            - Real coefficients (auto semiring)
+   Auto_total_real_arctic     - Real + Arctic semiring
+   Auto_total_real_tropical   - Real + Tropical semiring
+   Auto_total_real_arithmetic - Real + Arithmetic semiring
+
+   Example:
+   >> add_parallel_strategy_auto:Auto_total_int_arctic
+
+2. Custom Strategies (Advanced):
+   add_parallel_strategy_auto <TYPE> <SEMIRING> <MAX_SIZE> <MAX_WEIGHT> <OPTIMIZED>
+   ────────────────────────────────────────────────────────────────────────────────
+   <TYPE>       : int (discrete) | float (real numbers)
+   <SEMIRING>   : arctic | tropical | arithmetic
+   <MAX_SIZE>   : Max graph size to analyze (e.g., 10)
+   <MAX_WEIGHT> : Max weight allowed (e.g., 100)
+   <OPTIMIZED>  : true/false (enable optimizations)
+
+   Example:
+   >> add_parallel_strategy_auto int arctic 10 100 true
+
+QUICK-TEST COMMANDS
+  try_type_graph <SYS_ID> <STRATS> <TIMEOUT>  
+   - Test type graph method with semiring combo (e.g., `try_type_graph 2 ant 60`)
+   - <STRATS>: Letter combo (a=Real Arctic, A=Int Arctic, t/T= Tropical, n/N=Arithmetic)
+
+  try_subgraph_counting <SYS_ID>  
+   - Test subgraph counting method (e.g., `try_subgraph_counting 0`)
+
+EXAMPLES
+  1. Prove termination for system 0 with Arctic int:
+     >> select 0
+     >> add_parallel_strategy_auto:Auto_total_int_arctic
+     >> timeout 30
+     >> run
+
+  2. Try multiple semirings quickly:
+     >> try_type_graph 3 ANT 120  # Arctic(int) + Tropical(int) + Arithmetic(int)
+  "
   | "add_parallel_strategy_auto" :: coefficient :: semiring :: maxSize :: maxWeight :: optimized :: [] -> 
     begin  
       try

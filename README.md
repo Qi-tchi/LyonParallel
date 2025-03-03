@@ -40,7 +40,7 @@
 
 ### Try Type Graph Method with Non-well-founded Semirings
 
-**Example Usage:**
+**Example Usage:** 
 
 ```
 systems
@@ -89,9 +89,9 @@ Example:
 
 Displays the constructed weighted type graphs.
 
-The subgraph counting method is defined in 
-`lib/parallel.ml` and `lib/typeGraph.ml` 
----
+* The type graph method is defined in
+`lib/parallel.ml` and `lib/termination.ml`
+-----
 
 ### Try Subgraph Counting Method
 
@@ -121,13 +121,14 @@ Attempts to prove termination for the system at index `41`. On success:
 !!! Termination proved !!!!
 ...
 ```
-The subgraph counting method is defined in 
+
+* The subgraph counting method is defined in
 `lib/termination.ml`
 ---
 
 ### Available Systems
 
-Systems are defined in:
+* Systems are defined in:
 `lib/concreteGraphRewritingSystems.ml`
 
 ---
