@@ -40,7 +40,7 @@
 
 ### Try Type Graph Method with Non-well-founded Semirings
 
-**Example Usage:** 
+**Example Usage:**
 
 ```
 systems
@@ -90,8 +90,9 @@ Example:
 Displays the constructed weighted type graphs.
 
 * The type graph method is defined in
-`lib/parallel.ml` and `lib/termination.ml`
------
+  `lib/parallel.ml` and `lib/termination.ml`
+
+---
 
 ### Try Subgraph Counting Method
 
@@ -102,6 +103,7 @@ Displays the constructed weighted type graphs.
   - The union of $h_{R'L}$ for all $R'\in D(R,X)$ must be an edge-injective graph homomorphism.
   - Node-injective required if $X$ has isolated nodes.
 - Rule-set $\mathbb{X}$ is constrained to be a singleton.
+- The tool systematically evaluates every subgraph of the left-hand-side graphs in the rewriting rules.
 
 **Usage:**
 
@@ -123,13 +125,14 @@ Attempts to prove termination for the system at index `41`. On success:
 ```
 
 * The subgraph counting method is defined in
-`lib/termination.ml`
+  `lib/termination.ml`
+
 ---
 
 ### Available Systems
 
 * Systems are defined in:
-`lib/concreteGraphRewritingSystems.ml`
+  `lib/concreteGraphRewritingSystems.ml`
 
 ---
 

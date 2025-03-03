@@ -4,7 +4,7 @@ let time = ref 0.
 let (log:(GraphRewritingSystem.t list
 * string
 * Semiring.semiring_t
-* bool)
+* bool) 
 list ref) = ref []
 module StringSet = Set.Make(String)
 let systems = ConcretGraphRewritingSystems.grss 

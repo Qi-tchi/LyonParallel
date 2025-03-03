@@ -36,6 +36,9 @@ module Parallel = Icgt25__Parallel
 (** @canonical Icgt25.Semiring *)
 module Semiring = Icgt25__Semiring
 
+(** @canonical Icgt25.Subgraph_counting_forbidden_contexts *)
+module Subgraph_counting_forbidden_contexts = Icgt25__Subgraph_counting_forbidden_contexts
+
 (** @canonical Icgt25.Termination *)
 module Termination = Icgt25__Termination
 
