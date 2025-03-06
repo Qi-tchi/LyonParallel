@@ -346,10 +346,81 @@ let generate_phis drx rho =
       drx
   in
   let combinations = generate_combinations pairs in
-  combinations
+   List.map 
+   ~f:( fun l ->
+    MGraph.GraphMap.of_list l
+   ) combinations
+
+let%expect_test "" = 
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
+  let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
+  let drx = calculateDXR x rho in
+  let phis = generate_phis drx rho in
+  List.iteri (fun i phi ->
+    print_endline <| Printf.sprintf "phi %d: " i;
+    List.iteri (fun j (rp,h_rpl) -> 
+      Printf.sprintf "phi i%d j%d:\nr':\n%sh_r'l:\n%s" i j 
+      ( MGraph.toStr rp) (Homo.toStr h_rpl) |> print_endline
+    )
+    (phi |> MGraph.GraphMap.bindings)
+  )
+  phis;
+  [%expect{|
+    phi 0:
+    phi i0 j0:
+    r':
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1) ]h_r'l:
+    dom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(2,2);(3,3)]
+    he:[(1,1)]
+    phi i0 j1:
+    r':
+    nodes : [ 1;2;4 ]
+    arrows : [ (4,a,2,3) ]h_r'l:
+    dom:
+    nodes : [ 1;2;4 ]
+    arrows : [ (4,a,2,3) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(2,2);(4,3)]
+    he:[(3,2)]
+    phi i0 j2:
+    r':
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]h_r'l:
+    dom:
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(3,3)]
+    he:[(1,1)]
+    phi i0 j3:
+    r':
+    nodes : [ 2;4 ]
+    arrows : [ (4,a,2,3) ]h_r'l:
+    dom:
+    nodes : [ 2;4 ]
+    arrows : [ (4,a,2,3) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(2,2);(4,3)]
+    he:[(3,2)]
+  |}]
 
 
-let is_x_non_increasing_rule x rho drx phi =
+
+let is_x_non_increasing_rule x rho phi =
+  let drx = calculateDXR x rho in
   (* condition 1 *)
   let cond1 = List.for_all (fun (h_k'r', h_k'k) ->
     double_pullback_diagram_holds rho phi (h_k'r', h_k'k))
@@ -370,7 +441,17 @@ let%expect_test "" =
   let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x rho in
-  let (h_k'r', _) = List.nth drx 0 in
+  let phis = generate_phis drx rho in
+  List.iteri (fun i phi ->
+    print_endline <| Printf.sprintf "phi %d: " i;
+    List.iteri (fun j (rp,h_rpl) -> 
+      Printf.sprintf "phi i%d j%d:\nr':\n%sh_r'l:\n%s" i j 
+      ( MGraph.toStr rp) (Homo.toStr h_rpl) |> print_endline
+    )
+    (phi |> MGraph.GraphMap.bindings)
+  )
+  phis;
+  (* let (h_k'r', _) = List.nth drx 0 in
   let r' = Homo.codom h_k'r' in
   Printf.sprintf "r'\n%s" (r' |>MGraph.toStr) |> print_endline ;
   Printf.sprintf "Im r : \n%s" ((Homo.imgOf rho.r) |>MGraph.toStr) |> print_endline ;
@@ -388,23 +469,61 @@ let%expect_test "" =
   [(4,1);(2,3)] [(3,1)] in
   (* ignore h_r'l; *)
   let phi2 = MGraph.GraphMap.add r' h_r'l2 MGraph.GraphMap.empty in
-  is_x_non_increasing_rule x rho [drx |> List.hd] phi2 |> Printf.sprintf "is x non increasing : %b" |> print_endline;
+  is_x_non_increasing_rule x rho [drx |> List.hd] phi2 |> Printf.sprintf "is x non increasing : %b" |> print_endline; *)
+  is_x_non_increasing_rule x rho (List.nth phis 0) |> Printf.sprintf "is x non increasing : %b" |> print_endline; 
   [%expect{|
-      r'
-      nodes : [ 2;4 ]
-      arrows : [ (4,a,2,3) ]
-      Im r :
-      nodes : [ 1;2 ]
-      arrows : [  ]
-      Im l :
-      nodes : [ 1;2 ]
-      arrows : [  ]
-      condition1 : true
-      condition2 : true
-      condition3 : true
-      is x non increasing : true
-      condition1 : false
-      condition2 : false
-      condition3 : true
-      is x non increasing : false
+    phi 0:
+    phi i0 j0:
+    r':
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1) ]h_r'l:
+    dom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(2,2);(3,3)]
+    he:[(1,1)]
+    phi i0 j1:
+    r':
+    nodes : [ 1;2;4 ]
+    arrows : [ (4,a,2,3) ]h_r'l:
+    dom:
+    nodes : [ 1;2;4 ]
+    arrows : [ (4,a,2,3) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(2,2);(4,3)]
+    he:[(3,2)]
+    phi i0 j2:
+    r':
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]h_r'l:
+    dom:
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(1,1);(3,3)]
+    he:[(1,1)]
+    phi i0 j3:
+    r':
+    nodes : [ 2;4 ]
+    arrows : [ (4,a,2,3) ]h_r'l:
+    dom:
+    nodes : [ 2;4 ]
+    arrows : [ (4,a,2,3) ]
+    codom:
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+    hv:[(2,2);(4,3)]
+    he:[(3,2)]
+    condition1 : true
+    condition2 : true
+    condition3 : true
+    condition4 : true
+    is x non increasing : true
   |}]
