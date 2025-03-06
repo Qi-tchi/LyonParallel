@@ -331,7 +331,15 @@ module Graph = struct
       sg [21] : nodes : [ 1;2;3 ]
       arrows : [ (1,s,3,1);(2,s,3,3);(3,0,3,2) ]
     |}]
-  let isSubGraphOf sg g = Ulg.isSubGraphOf (sg |> unlabelled) (g |> unlabelled)
+  let isSubGraphOf sg g = 
+    Ulg.isSubGraphOf (sg |> unlabelled) (g |> unlabelled) &&
+    let ars = arrows sg in
+    ArrowSet.for_all 
+      (fun ar -> 
+        let l, l' = labelOf sg ar, labelOf g ar in
+        Label.equal l l')
+      ars
+
   let unionOfSubGraphs g g' =  
     let newulg = Ulg.unionOfSubGraphs (unlabelled g) (unlabelled g') in
     let newl = ArrowMap.union 
@@ -341,8 +349,18 @@ module Graph = struct
     |Some g' -> g'
     |None -> assert(false)
 
-  (* to do todo : debug *)
-  let intersectionOfSubGraphs g g' =  
+ (** for two subgraphs [g] [g'] of a graph, return their intersection *)
+  let intersectionOfSubGraphs g g' =
+    (* condition for [g] [g'] to be subgraphs of a graph *)
+    assert (ArrowSet.for_all
+      (fun ar -> 
+        if isArrowOf g' ar then 
+          (Node.equal (dstOf g ar) (dstOf g' ar) &&
+          Node.equal (srcOf g ar) (srcOf g' ar))
+        else true        
+      ) 
+      (arrows g));
+    (* body *)
     let newulg = Ulg.intersectionOfSubGraphs (unlabelled g) (unlabelled g') in
     let newl = ArrowMap.filter 
       (fun ar _ -> ArrowSet.mem ar (Ulg.arrows newulg))
@@ -350,6 +368,27 @@ module Graph = struct
     match fromUnlabGraphAndLabFunc_opt newulg newl with
     |Some g' -> g'
     |None -> assert(false)
+
+
+  let%expect_test "" = 
+    let s = fromList [1;4] [(1,"a",4,1)] in
+    let s' = fromList [1;2] [] in
+    let i = intersectionOfSubGraphs s s' in
+    print_endline (toStr i)
+    ;[%expect {|
+      nodes : [ 1 ]
+      arrows : [  ]
+    |}]
+
+  let%expect_test "" = 
+    let s = fromList [1;4] [(1,"a",1,2);(1,"a",4,1);(4,"a",1,3)] in
+    let s' = fromList [1;2;4] [(4,"a",2,4);(1,"a",4,1);(4,"a",2,5)] in
+    let i = intersectionOfSubGraphs s s' in
+    print_endline (toStr i)
+    ;[%expect {|
+      nodes : [ 1;4 ]
+      arrows : [ (1,a,4,1) ]
+    |}]
 
   let isProperSubgraph sg g =
     isSubGraphOf sg g &&
@@ -391,6 +430,7 @@ module Graph = struct
     sg [11] : nodes : [ 1;2;3 ]
     arrows : [ (1,s,3,1) ]
     |}]
+    
   let propreSubgraphs lg = 
     List.filter (fun sg -> isProperSubgraph sg lg) (subGraphs lg)
   let isSingleton g = order g = 1 && size g = 0
@@ -473,6 +513,7 @@ module Graph = struct
 end
 
 module GraphSet = Set.Make(Graph)
+module GraphMap = Map.Make(Graph)
 include Graph
 
 let find_all_arrows_satisfying_property x p =  

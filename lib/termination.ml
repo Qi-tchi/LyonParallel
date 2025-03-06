@@ -10,6 +10,22 @@ module MGraph = struct
 end
 
 
+
+let%expect_test "" = 
+  let x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)] in
+  let g = MGraph.fromList [1;2;3] [] in
+  let y=MGraph.fromList [4;5;6] [(4,"a",5,7);(5,"a",6,10)] in
+  print_endline (MGraph.iso x g |> string_of_bool);
+  print_endline (MGraph.iso g x |> string_of_bool);
+  print_endline (MGraph.iso y x |> string_of_bool);
+  print_endline (MGraph.iso x y |> string_of_bool);
+  [%expect{|
+    false 
+    false
+    true
+    true
+  |}]
+
 (* let calculateAllOccurrenceOfXInG g x =
   let occurrences = List.map ~f:imgOfHomomorphism (hom x g) in 
   occurrences *)

@@ -118,14 +118,80 @@ nodes : [ 0;1 ]
 hv:\n      [(1,1);(2,0)]
 he:[(1,10);(2,11);(3,4)]
 *)
-
-let imgOf h = 
-  let codom, hv, he = codom h, hv h, he h in 
-  let img_hv = hv |> NodeMap.bindings |> List.map snd |> NodeSet.of_list in
-  let img_he = he |> ArrowMap.bindings |> List.map snd |> ArrowSet.of_list in
-  MGraph.subgraphFrom codom img_hv img_he
-
+let fromList domVList domEList codomVList codomEList hv he =
+  let dom = MGraph.fromList domVList domEList in
+  let codom = MGraph.fromList codomVList codomEList in
+  let hv = List.map (fun (x,y) -> (x |> Node.fromInt, y |> Node.fromInt)) hv |> List.to_seq |> NodeMap.of_seq in
+  let he = List.map (fun (x,y) -> (x |> Arrow.fromInt, y |> Arrow.fromInt)) he 
+   |> List.to_seq |> ArrowMap.of_seq in
+  fromGraphsAndMaps dom codom hv he
+let app_hv ~h v = 
+  let hv = hv h in
+  assert (NodeMap.mem v hv);
+  NodeMap.find v hv
   
+let%expect_test _ = 
+  let h =  fromList 
+    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)]  in
+  app_hv ~h 1 
+  |> Node.toStr
+  |> print_string
+  ;[%expect{|
+    1
+  |}]
+
+let app_he ~h e = 
+  let he = he h in
+  assert (ArrowMap.mem e he);
+  ArrowMap.find e he
+
+let%expect_test _ = 
+  let h =  fromList 
+    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)]  in
+  app_he ~h 2
+  |> Arrow.toStr
+  |> print_string
+  ;[%expect{|
+    1
+  |}]
+
+let app ~h g = 
+  assert(MGraph.isSubGraphOf g (dom h));
+  let vs = MGraph.nodes g |> NodeSet.to_list |> List.map (app_hv ~h) in
+  let es = MGraph.arrows g |> ArrowSet.to_list |> List.map (app_he ~h) in 
+  MGraph.subgraphFrom (codom h) (vs |> NodeSet.of_list) (es |> ArrowSet.of_list)
+
+let%expect_test _ = 
+  let h =  fromList 
+    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] 
+    [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)]  in
+  let g = MGraph.fromList [1;2] [(1,"a",2,1)] in
+  app ~h g
+  |> MGraph.toStr
+  |> print_string
+  ;[%expect{|
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]
+  |}]
+
+let%expect_test _ = 
+  let h =  fromList 
+    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] 
+    [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)]  in 
+  let g = MGraph.fromList [1;3;4] [(3,"a",4,2)] in
+  app ~h g
+  |> MGraph.toStr
+  |> print_string
+  ;[%expect{|
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]
+  |}]
+
+  (* to do to do debug *)
   
   (* let imgOfKByH (k : 'b  graph) (h : 'b homomorphism) =
     assert (isIncludedAsSet k.vertices h.dom.vertices ~compare:compareVertex);
@@ -138,14 +204,8 @@ let imgOf h =
 
 (* let fromGraphsAndMaps_try dom codom hv he = try Some( fromGraphsAndMaps dom codom hv he) with _ -> None  *)
 (* constructor with lists *)
-let fromList domVList domEList codomVList codomEList hv he =
-  let dom = MGraph.fromList domVList domEList in
-  let codom = MGraph.fromList codomVList codomEList in
-  let hv = List.map (fun (x,y) -> (x |> Node.fromInt, y |> Node.fromInt)) hv |> List.to_seq |> NodeMap.of_seq in
-  let he = List.map (fun (x,y) -> (x |> Arrow.fromInt, y |> Arrow.fromInt)) he 
-   |> List.to_seq |> ArrowMap.of_seq in
-  fromGraphsAndMaps dom codom hv he
- 
+
+(*  
 (* begin test *)
 let%expect_test _ = 
   let h = fromList 
@@ -158,7 +218,7 @@ let%expect_test _ =
   ;[%expect {|
   nodes : [ 1;3 ]
   arrows : [ (1,a,3,1) ]
-  |}]
+  |}] *)
 
 (* begin test *)
 (* test not structure preserving *)
@@ -221,12 +281,92 @@ let%test _ =
     [(1,1);(2,3)]
      [(1,1)]   |> ignore; true 
   (* end test *)
+
+
+let toStr h = 
+  let hv_str = hvToStr (h |> hv) in
+  let he_str = heToStr (h |> he) in
+  Printf.sprintf "dom:\n%s\ncodom:\n%s\nhv:%s\nhe:%s" 
+  (dom h |> MGraph.toStr) (codom h |> MGraph.toStr) hv_str he_str
+let%expect_test "" = 
+  let grs_ex69_variant_r1_r = fromList
+  [1;2;3] []
+  [1;2;3;4] [(1,"s",3,1); (3,"0",3,2); (2,"s",4,3); (4,"0",4,4)]
+  [(1,1);(2,2);(3,3)] 
+  [] in 
+  toStr grs_ex69_variant_r1_r |> print_string;
+  [%expect {|
+      dom:
+      nodes : [ 1;2;3 ]
+      arrows : [  ]
+      codom:
+      nodes : [ 1;2;3;4 ]
+      arrows : [ (1,s,3,1);(2,s,4,3);(3,0,3,2);(4,0,4,4) ]
+      hv:[(1,1);(2,2);(3,3)]
+      he:[]
+  |}] 
+  
+let imgOf h = 
+  let codom, hv, he = codom h, hv h, he h in 
+  let img_hv = hv |> NodeMap.bindings |> List.map snd |> NodeSet.of_list in
+  let img_he = he |> ArrowMap.bindings |> List.map snd |> ArrowSet.of_list in
+  MGraph.subgraphFrom codom img_hv img_he
+
+
+let%expect_test _ = 
+  fromList 
+    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)] 
+  |> imgOf |> MGraph.toStr |> print_string
+  ;[%expect{|
+    nodes : [ 1;3 ]
+    arrows : [ (1,a,3,1) ]
+  |}]
+
+(* let toStr_hv h sep = 
+  h |> hv |> NodeMap.bindings |> List.map (fun (x,y) -> Printf.sprintf "(%s,%s)" (Node.toStr x) (Node.toStr y)) |> String.concat sep
+let toStr_he h sep = 
+    h |> he |> ArrowMap.bindings |> List.map (fun (x,y) -> Printf.sprintf "(%s,%s)" (Arrow.toStr x) (Arrow.toStr y)) |> String.concat sep *)
+
+(** return identity function *)
 let id g =
   assert (MGraph.isGraph g);
   let hv = List.map (fun x -> (x,x)) (MGraph.nodes g |> NodeSet.elements) |>  List.to_seq |>NodeMap.of_seq in
   let he = List.map (fun x -> (x,x)) (MGraph.arrows g |> ArrowSet.elements) |>  List.to_seq |> ArrowMap.of_seq in
   fromGraphsAndMaps g g hv he
-  
+
+let inclusion_morph subGraph graph = 
+  assert (MGraph.isSubGraphOf subGraph graph);
+  let h = id subGraph in
+  {h with codom = graph}
+
+let%expect_test _ = 
+  let sg = MGraph.fromList [1;2] [(1,"a",2,1)] in
+  let g = MGraph.fromList [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] in
+  print_string (MGraph.isSubGraphOf sg g |> string_of_bool) ;
+  (* let i = inclusion_morph sg g in
+  toStr i |> print_string *)
+  ;[%expect{|
+    false
+  |}]
+
+let%expect_test _ = 
+  let sg = MGraph.fromList [1;2] [(1,"a",2,1)] in
+  let g = MGraph.fromList [1;2;3;4] [(1,"a",2,1);(3,"b",4,2);(4,"a",2,3)] in
+  print_endline (MGraph.isSubGraphOf sg g |> string_of_bool) ;
+  let i = inclusion_morph sg g in
+  toStr i |> print_string
+  ;[%expect{|
+    true
+    dom:
+    nodes : [ 1;2 ]
+    arrows : [ (1,a,2,1) ]
+    codom:
+    nodes : [ 1;2;3;4 ]
+    arrows : [ (1,a,2,1);(3,b,4,2);(4,a,2,3) ]
+    hv:[(1,1);(2,2)]
+    he:[(1,1)]
+  |}]
 
 let isInjOnNodes h = 
   let hv = hv h in 
@@ -270,10 +410,13 @@ let%test _ =
   fromList [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)] |> isInjOnArrows |> not
 
 let isSurjOnArrows h = 
-  let he = he h in 
-  let img = 
+  let codomain = codom h |> MGraph.arrows in 
+  let img_arrows = imgOf h |> MGraph.arrows in
+  MGraph.ArrowSet.equal codomain img_arrows
+  (* let he = he h in 
+  let img =
     he |> ArrowMap.bindings |> List.map snd |> ArrowSet.of_list in
-  Int.equal (dom h |> MGraph.size) (img |> ArrowSet.cardinal)
+  Int.equal (dom h |> MGraph.size) (img |> ArrowSet.cardinal) *)
 
 (* test injective on arrows *)
 let%test _ = 
@@ -293,9 +436,11 @@ let isSurj h =
   isSurjOnNodes h &&
   (* inj on edges *)
   isSurjOnArrows h
+
 let isIso h = 
   isInj h && isSurj h
   
+
 let isSpan f g = (dom f) |> MGraph.Graph.equal (dom g)
   (* shareDomFonc f.hv g.hv ~compare:compareVertex && shareDomFonc f.he g.he ~compare:compareEdge *)
 
@@ -601,6 +746,20 @@ let%expect_test "" =
     arrows : [ (2,s,3,2) ]
     |}]
 
+  let%expect_test "" = 
+    let a = MGraph.fromList [1;2] [] in
+    let b = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)] in
+    let d = MGraph.fromList [1;2;3;6;7] [(1,"a",3,1);(3,"a",2,2);(1,"a",7,3);(2,"a",6,4)] in
+    begin 
+      match existPushoutComplementOfInjHomos a b d with
+      |Some x -> x |> MGraph.toStr |> print_string
+      |None -> print_string "\na -id-> b -id-> d : no pushout complement\n";
+    end;
+    [%expect {|
+      nodes : [ 1;2;6;7 ]
+      arrows : [ (1,a,7,3);(2,a,6,4) ]
+      |}]
+
   (* let g' = renameDomOfInjHomo g in
   let f' = renameDomOfInjHomo (composition f g) in
   if  *)
@@ -622,33 +781,6 @@ let cardHomInjOnEdges x g = homInjOnEdges x g |> List.length *)
   let dot_lines = "digraph G {\n" :: (node_lines @ edge_lines) @ ["}\n"] in
     String.concat ~sep:"\n" dot_lines *)
 
-let toStr h = 
-  let hv_str = hvToStr (h |> hv) in
-  let he_str = heToStr (h |> he) in
-  Printf.sprintf "dom:\n%s\ncodom:\n%s\nhv:%s\nhe:%s" 
-  (dom h |> MGraph.toStr) (codom h |> MGraph.toStr) hv_str he_str
-let%expect_test "" = 
-  let grs_ex69_variant_r1_r = fromList
-  [1;2;3] []
-  [1;2;3;4] [(1,"s",3,1); (3,"0",3,2); (2,"s",4,3); (4,"0",4,4)]
-  [(1,1);(2,2);(3,3)] 
-  [] in 
-  toStr grs_ex69_variant_r1_r |> print_string;
-  [%expect {|
-      dom:
-      nodes : [ 1;2;3 ]
-      arrows : [  ]
-      codom:
-      nodes : [ 1;2;3;4 ]
-      arrows : [ (1,s,3,1);(2,s,4,3);(3,0,3,2);(4,0,4,4) ]
-      hv:[(1,1);(2,2);(3,3)]
-      he:[]
-  |}] 
-  
-(* let toStr_hv h sep = 
-  h |> hv |> NodeMap.bindings |> List.map (fun (x,y) -> Printf.sprintf "(%s,%s)" (Node.toStr x) (Node.toStr y)) |> String.concat sep
-let toStr_he h sep = 
-   h |> he |> ArrowMap.bindings |> List.map (fun (x,y) -> Printf.sprintf "(%s,%s)" (Arrow.toStr x) (Arrow.toStr y)) |> String.concat sep *)
 
 (** given a cospan [A-f-> T <-h-B] return [{g :A -> B | A -g-> B -h-> T = -f->}]  *)
 let factorsOfThrought f h = 
@@ -676,3 +808,4 @@ let%expect_test "factorsOfThrought" =
   ;[%expect {|
   |{ - star h = e }| = 1
   |}];;
+
