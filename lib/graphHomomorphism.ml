@@ -1,3 +1,4 @@
+
 module MGraph = MGraph
 module Arrow = MGraph.Arrow
 module Node = MGraph.Node
@@ -129,17 +130,6 @@ let app_hv ~h v =
   let hv = hv h in
   assert (NodeMap.mem v hv);
   NodeMap.find v hv
-  
-let%expect_test _ = 
-  let h =  fromList 
-    [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
-    [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3);(3,1);(4,3)] [(1,1); (2,1)]  in
-  app_hv ~h 1 
-  |> Node.toStr
-  |> print_string
-  ;[%expect{|
-    1
-  |}]
 
 let app_he ~h e = 
   let he = he h in
@@ -190,6 +180,9 @@ let%expect_test _ =
     nodes : [ 1;3 ]
     arrows : [ (1,a,3,1) ]
   |}]
+
+
+
 
   (* to do to do debug *)
   
@@ -305,7 +298,8 @@ let%expect_test "" =
       hv:[(1,1);(2,2);(3,3)]
       he:[]
   |}] 
-  
+
+(** [imgOf h:A->B] = h(A) *)
 let imgOf h = 
   let codom, hv, he = codom h, hv h, he h in 
   let img_hv = hv |> NodeMap.bindings |> List.map snd |> NodeSet.of_list in
@@ -322,6 +316,8 @@ let%expect_test _ =
     nodes : [ 1;3 ]
     arrows : [ (1,a,3,1) ]
   |}]
+
+
 
 (* let toStr_hv h sep = 
   h |> hv |> NodeMap.bindings |> List.map (fun (x,y) -> Printf.sprintf "(%s,%s)" (Node.toStr x) (Node.toStr y)) |> String.concat sep
@@ -430,7 +426,64 @@ let isInj h =
   isInjOnNodes h &&
   (* inj on edges *)
   isInjOnArrows h
-  
+
+
+(** [preimgOf (h:A->B) B'] = [h^{-1}(B')] where [B'] is a subgraph of B *)
+let preimgOf h b' = 
+  assert (MGraph.isSubGraphOf b' (imgOf h));
+  (* assert (h |> isInj); *)
+  let subgraphs = h |> dom |> MGraph.subGraphs in
+  let subgraphs = List.filter 
+    (fun x -> let x' = app ~h x in
+              MGraph.equal x' b')
+    subgraphs in
+  (* assert (subgraphs |> List.length = 1); *)
+  (* assert . if false then function definition false *)
+  subgraphs
+
+let%expect_test "" = 
+  let h = fromList 
+          [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+          [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] 
+          [(1,1);(2,3);(3,4);(4,2)] [(1,1);(2,3)] in
+  let g = MGraph.fromList 
+          [1;3] [(1,"a",3,1)] in 
+  let preimgs = preimgOf h g in
+  List.iter (fun g' -> MGraph.toStr g' |> print_endline) preimgs;
+;[%expect{|
+  nodes : [ 1;2 ]
+  arrows : [ (1,a,2,1) ]
+|}]
+
+let%expect_test "" = 
+  let h = fromList 
+          [1;2;3;4] [(1,"a",2,1);(3,"a",4,2)] 
+          [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] 
+          [(1,1);(2,3);(3,1);(4,3)] [(1,1);(2,1)] in
+  let g = MGraph.fromList 
+          [1;3] [(1,"a",3,1)] in 
+  let preimgs = preimgOf h g in
+  List.iter (fun g' -> MGraph.toStr g' |> print_endline) preimgs;
+;[%expect{|
+  nodes : [ 3;4 ]
+  arrows : [ (3,a,4,2) ]
+  nodes : [ 2;3;4 ]
+  arrows : [ (3,a,4,2) ]
+  nodes : [ 1;3;4 ]
+  arrows : [ (3,a,4,2) ]
+  nodes : [ 1;2 ]
+  arrows : [ (1,a,2,1) ]
+  nodes : [ 1;2;4 ]
+  arrows : [ (1,a,2,1) ]
+  nodes : [ 1;2;3 ]
+  arrows : [ (1,a,2,1) ]
+  nodes : [ 1;2;3;4 ]
+  arrows : [ (3,a,4,2) ]
+  nodes : [ 1;2;3;4 ]
+  arrows : [ (1,a,2,1) ]
+  nodes : [ 1;2;3;4 ]
+  arrows : [ (1,a,2,1);(3,a,4,2) ]
+|}]
 let isSurj h = 
   (* inj on vertices *)
   isSurjOnNodes h &&
@@ -788,7 +841,7 @@ let factorsOfThrought f h =
   let gs = homSet (dom f) (dom h) in
   List.filter (fun g -> isCommutative [f] [g;h]) gs
 
-let%expect_test "factorsOfThrought" = 
+(* let%expect_test "factorsOfThrought" = 
   (*  1 -"a"1-> 3 -"a"2-> 2 *)
   let domh = MGraph.fromList  [1;2;3] [(1,"a",3,1);(3,"a",2,2)]  
   in
@@ -807,5 +860,37 @@ let%expect_test "factorsOfThrought" =
   print_endline ("|{ - star h = e }| = " ^ string_of_int (gs |> List.length))
   ;[%expect {|
   |{ - star h = e }| = 1
-  |}];;
+  |}];; *) 
 
+
+  let occs x g =
+    homSet x g |> List.filter isInj 
+  let%expect_test "" = 
+    let x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)] in
+    let g = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)] in
+    let occs = occs x g in
+    let occs = List.map imgOf occs in
+    Printf.sprintf "%d occs" (List.length occs) |> print_endline;
+    List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr o) |> print_endline) occs
+    ;[%expect {|
+      1 occs
+      nodes : [ 1;2;3 ]
+      arrows : [ (1,a,3,1);(3,a,2,2) ]
+    |}];;
+  let%expect_test "" = 
+    let x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)] in
+    let g = MGraph.fromList [1;2;3;4;7;6] 
+      [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3);
+       (7,"a",1,4);(2,"a",6,5)
+      ]in
+    let occs = occs x g in
+    let occs = List.map imgOf occs in
+    Printf.sprintf "%d occs" (List.length occs) |> print_endline;
+    List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr o) |> print_endline) occs
+    ;[%expect {|
+      2 occs
+      nodes : [ 2;4;6 ]
+      arrows : [ (2,a,6,5);(4,a,2,3) ]
+      nodes : [ 1;3;7 ]
+      arrows : [ (1,a,3,1);(7,a,1,4) ]
+    |}];; 

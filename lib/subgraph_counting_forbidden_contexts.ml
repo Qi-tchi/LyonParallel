@@ -527,3 +527,102 @@ let%expect_test "" =
     condition4 : true
     is x non increasing : true
   |}]
+
+
+(****************************************
+           Predictable
+*******************************************)
+(* Condition 1 *)
+(** [generate_occs_with_forbidden_contexts x g] = [(occs_x,occs_x_forbiddened, occs_x_not_forbiddened)] *)
+let generate_occs_with_forbidden_contexts x g =
+  let forbidden_contexts = x.fx |> List.map Homo.codom in
+  let occs_forbidden_contexts = 
+    List.fold_right 
+    (fun f acc ->
+      List.append acc 
+      (Homo.occs f g)
+    ) 
+    forbidden_contexts 
+    [] 
+  in
+  let occs_x = Homo.occs x.x g in
+  let occs_x_forbiddened, occs_x_not_forbiddened = List.partition (fun x -> 
+    List.for_all 
+    (fun f -> MGraph.isSubGraphOf (x |> Homo.imgOf) (f |> Homo.imgOf))
+    occs_forbidden_contexts
+  ) occs_x in
+  occs_x,occs_x_forbiddened, occs_x_not_forbiddened
+(* let predictable_condition1 (x:rulerGraph) rho =
+  let forbidden_contexts = x.fx |> List.map Homo.codom in
+  let occs_forbidden_contexts = 
+    List.fold_right 
+    (fun f acc ->
+      List.append acc 
+
+    )
+    forbidden_contexts
+    [] *)
+(* Condition 2 *)
+(* Condition 3 *)
+(* Condition 4 *)
+
+let%expect_test "" = 
+  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+          fx = [Homo.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
+          [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
+  let g = MGraph.fromList [1;2;3;4;7;6] 
+    [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2);
+        (7,"a",1,4);(2,"a",6,5)
+    ]in
+  let _,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
+  Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
+  List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
+  List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
+  ;[%expect {|
+    2 occs not forbiddened
+    nodes : [ 2;3;6 ]
+    arrows : [ (2,a,6,5);(3,a,2,2) ]
+    nodes : [ 1;3;7 ]
+    arrows : [ (1,a,3,1);(7,a,1,4) ]
+    1 occs forbiddened
+    nodes : [ 1;2;3 ]
+    arrows : [ (1,a,3,1);(3,a,2,2) ]
+  |}];; 
+
+let predictable_cond1 x (rho : Rule.t) (mx:Homo.t Homo.GraphHomoMap.t) =
+  let lhs, rhs = rho.l, rho.r in
+  let l,r = rho |> Rule.leftGraph, rho |> Rule.rightGraph in
+  let mono_x_l_forbidden = 
+    match generate_occs_with_forbidden_contexts x l with _,_,occs -> occs 
+    |> Homo.GraphHomoSet.of_list
+  in
+  let mono_x_r_forbidden = 
+      match generate_occs_with_forbidden_contexts x r with _,_,occs -> occs 
+      |> Homo.GraphHomoSet.of_list
+    in
+  (* assertion : mx is well defined . can be eliminated after debugging *)
+  assert (
+  (let dom_mx = Homo.GraphHomoMap.bindings mx |> List.map fst 
+      |> Homo.GraphHomoSet.of_list in
+   (Homo.GraphHomoSet.subset dom_mx mono_x_l_forbidden) &&
+   (Homo.GraphHomoSet.subset mono_x_l_forbidden dom_mx) 
+   ) &&
+   (let codom_mx = Homo.GraphHomoMap.bindings mx |> List.map snd 
+   |> Homo.GraphHomoSet.of_list in
+   Homo.GraphHomoSet.subset codom_mx mono_x_r_forbidden)
+  );
+  (* body *)
+  Homo.GraphHomoSet.for_all 
+  (
+    fun h_x_l -> 
+      (* find ok because of the condition above *)
+      let h_x_r = Homo.GraphHomoMap.find h_x_l mx in
+      let (_, h_k'_k_left) = Category_Graph.pullback_cospan_monos (h_x_l, lhs) in
+      let (_, h_k'_k_right) = Category_Graph.pullback_cospan_monos (h_x_r, rhs) in
+      let img1 = h_k'_k_left |> Homo.imgOf in
+      let img2 = h_k'_k_right |> Homo.imgOf in
+      MGraph.equal img1 img2
+  )
+  mono_x_l_forbidden
