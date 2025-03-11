@@ -1,8 +1,8 @@
-module Homo = GraphHomomorphism
+(* module Homo = GraphHomomorphism
 module Grs = GraphRewritingSystem
 module RuleSet = GraphRewritingSystem.RuleSet
 module Rule = GraphRewritingSystem.DPOrule
-type rulerGraph = {x : MGraph.t; fx : Homo.t option}
+type rulerGraph = {x : MGraph.t; fx : Homo.t list}
 let (<|) f x = f x
 
 (*****************************************
@@ -38,7 +38,7 @@ let%expect_test "" =
 let iso_to_x x rp =
   Termination.MGraph.iso rp x
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let subgraphs = rho |> Rule.rightGraph |> MGraph.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
@@ -81,7 +81,7 @@ let can_construct_pbpo_diagram (x:MGraph.t) h_K'R' r' =
   (List.is_empty tmp |> not)
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let subgraphs = rho |> Rule.rightGraph |> MGraph.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
@@ -161,7 +161,7 @@ let calculateDXR (x:MGraph.t) (rl:Rule.t) =
 
  
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   calculateDXR x.x rho 
   |>
@@ -204,7 +204,7 @@ let double_pullback_diagram_holds rho (phi:Homo.t MGraph.GraphMap.t) (h_k'r', h_
     MGraph.equal pb_obj1 pb_obj2 *)
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x.x rho in
   let (h_k'r', h_k'k) = List.nth drx 0 in
@@ -352,7 +352,7 @@ let generate_phis drx rho =
    ) combinations
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x.x rho in
   let phis = generate_phis drx rho in
@@ -438,7 +438,7 @@ let is_x_non_increasing_rule x rho phi =
   cond1 && cond2 && cond3 && cond4
     
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = []} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x.x rho in
   let phis = generate_phis drx rho in
@@ -535,9 +535,15 @@ let%expect_test "" =
 (* Condition 1 *)
 (** [generate_occs_with_forbidden_contexts x g] = [(occs_x,occs_x_forbiddened, occs_x_not_forbiddened)] *)
 let generate_occs_with_forbidden_contexts x g =
-  let f = x.fx |> Option.get |> Homo.codom in
+  let forbidden_contexts = x.fx |> List.map Homo.codom in
   let occs_forbidden_contexts = 
-    Homo.occs f g
+    List.fold_right 
+    (fun f acc ->
+      List.append acc 
+      (Homo.occs f g)
+    ) 
+    forbidden_contexts 
+    [] 
   in
   let occs_x = Homo.occs x.x g in
   let occs_x_forbiddened, occs_x_not_forbiddened = List.partition (fun x -> 
@@ -562,9 +568,9 @@ let generate_occs_with_forbidden_contexts x g =
 
 let%expect_test "" = 
   let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-          fx = Some (Homo.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
+          fx = [Homo.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)])} in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
   let g = MGraph.fromList [1;2;3;4;7;6] 
     [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2);
         (7,"a",1,4);(2,"a",6,5)
@@ -636,10 +642,10 @@ let generate_mx x (rho:Rule.t) =
 let%expect_test "" = 
   let rho =  ConcretGraphRewritingSystems.bruggink_2014_ex1_rl in
   let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-          fx = Some (Homo.fromList 
+          fx = [Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]) } in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
   let mxs = generate_mx x rho in
   let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
    String.concat "next mx\n" tmp
@@ -675,10 +681,10 @@ let%expect_test "" =
     [(1,1);(2,2)] [] in 
   let rho = Grs.fromHomos l1 r1 in
   let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-          fx = Some (Homo.fromList 
+          fx = [Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]) } in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
   let mxs = generate_mx x rho in
   Printf.sprintf "|mxs| = %d\n" (List.length mxs) |> print_endline;
   let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
@@ -856,7 +862,7 @@ let%expect_test "" =
    String.concat "next mf\n" tmp
    |> print_endline;
   let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-   fx = Some h_x_f } in
+   fx = [h_x_f] } in
   let mxs = generate_mx x rho in
   let mx = List.hd mxs in
   let mfs_filtered = List.filter (predictable_cond2 x h_x_f rho mx) mfs in
@@ -909,7 +915,7 @@ let%expect_test "" =
 let inverse_rule (rho: Rule.t) = 
   Rule.fromHomos rho.r rho.l 
 let predictable_cond3 x rho  =  
-  let drx = calculateDXR x.x rho in
+  let drx = calculateDXR x rho in
   let phis = generate_phis drx rho in
   (List.exists
     (is_x_non_increasing_rule x rho)
@@ -919,25 +925,14 @@ let predictable_cond3 x rho  =
     phis)
   
 (* predictable : Condition 5 *)
-let predictable_cond5 x rho mx phi = 
-  assert (x.fx |> Option.is_some);
-  let l = rho |> Rule.leftGraph in
-  let f = x.fx |> Option.get |> Homo.codom in
+let predictable_cond5 h_x_f rho mx phi_map = 
+  let f = Homo.codom h_x_f in
   let d_l_f = calculateDXR f (inverse_rule rho) in
   List.for_all
-    (fun (h_kp_lp,_) ->
+    (fun h_kp_lp ->
       let lp = Homo.codom h_kp_lp in
-      let h_x_lp_list = Homo.occs x.x lp in
-      List.for_all 
-        (fun h_x_lp ->
-          let h_lp_l = Homo.inclusion_morph lp l in
-          let h_x_l = Homo.composition h_x_lp h_lp_l in
-          let left = Homo.GraphHomoMap.find h_x_l mx in
-          let h_lp_r = MGraph.GraphMap.find lp phi in
-          let right = Homo.composition h_x_lp h_lp_r in
-          Homo.isCommutative [left] [right]
-        )
-        h_x_lp_list
+      
+
     )
     d_l_f
-
+ *)
