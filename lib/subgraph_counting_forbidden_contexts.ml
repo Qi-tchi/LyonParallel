@@ -595,11 +595,11 @@ let predictable_cond1 x (rho : Rule.t) (mx:Homo.t Homo.GraphHomoMap.t) =
   let lhs, rhs = rho.l, rho.r in
   let l,r = rho |> Rule.leftGraph, rho |> Rule.rightGraph in
   let mono_x_l_forbidden = 
-    match generate_occs_with_forbidden_contexts x l with _,_,occs -> occs 
+    match generate_occs_with_forbidden_contexts x l with _,occs_x_forbiddened,_ -> occs_x_forbiddened 
     |> Homo.GraphHomoSet.of_list
   in
   let mono_x_r_forbidden = 
-      match generate_occs_with_forbidden_contexts x r with _,_,occs -> occs 
+      match generate_occs_with_forbidden_contexts x r with _,occs_x_forbiddened,_ -> occs_x_forbiddened 
       |> Homo.GraphHomoSet.of_list
     in
   (* assertion : mx is well defined . can be eliminated after debugging *)
@@ -626,3 +626,58 @@ let predictable_cond1 x (rho : Rule.t) (mx:Homo.t Homo.GraphHomoMap.t) =
       MGraph.equal img1 img2
   )
   mono_x_l_forbidden
+   
+let generate_mx x (rho:Rule.t) =
+  (* let lhs, rhs = rho.l, rho.r in *)
+  let l,r = rho |> Rule.leftGraph, rho |> Rule.rightGraph in
+  let mono_x_l_forbidden = 
+    match generate_occs_with_forbidden_contexts x l with _,occs_x_forbiddened,_ -> occs_x_forbiddened 
+  in
+  let mono_x_r_forbidden = 
+      match generate_occs_with_forbidden_contexts x r with _,occs_x_forbiddened,_ -> occs_x_forbiddened 
+  in
+  let mxs = Aux_functions.inj_maps_from_to mono_x_l_forbidden mono_x_r_forbidden in 
+  List.map Homo.GraphHomoMap.of_list mxs
+
+let%expect_test "" = 
+  let rho =  ConcretGraphRewritingSystems.bruggink_2014_ex1_rl in
+  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+          fx = [Homo.fromList 
+          [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
+          [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
+  let mxs = generate_mx x rho in
+  let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
+   String.concat "next mx\n" tmp
+   |> print_endline
+  ;[%expect {|
+  |}];; 
+
+
+let%expect_test "" = 
+  let l1 = Homo.fromList
+    [1;2] [] 
+    [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
+    [(1,1);(2,2)] [] in
+  let r1 =  Homo.fromList
+    [1;2] [] 
+    [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
+    [(1,1);(2,2)] [] in 
+  let rho = Grs.fromHomos l1 r1 in
+  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+          fx = [Homo.fromList 
+          [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
+          [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)] ] } in
+  let mxs = generate_mx x rho in
+  Printf.sprintf "|mxs| = %d\n" (List.length mxs) |> print_endline;
+  let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
+   String.concat "next mx\n" tmp
+   |> print_endline;
+  let mxs_filtered = List.filter (predictable_cond1 x rho) mxs in
+    Printf.sprintf "|mxs_filtered| = %d\n" (List.length mxs_filtered) |> print_endline;
+  let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs_filtered in 
+    String.concat "next mx\n" tmp
+    |> print_endline;
+  ;[%expect {|
+  |}];; 

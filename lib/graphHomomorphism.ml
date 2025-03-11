@@ -30,6 +30,8 @@ end
 include GraphHomo
 module GraphHomoSet = Set.Make(GraphHomo)
 module GraphHomoMap = Map.Make(GraphHomo)
+
+
 let hv h = h.hv
 let he h = h.he
 let dom h = h.dom
@@ -894,3 +896,11 @@ let factorsOfThrought f h =
       nodes : [ 1;3;7 ]
       arrows : [ (1,a,3,1);(7,a,1,4) ]
     |}];; 
+
+let toStr_GraphHomoMap m = 
+  (GraphHomoMap.bindings m) 
+  |> List.map
+    ( fun (h_key,h_value) -> 
+        Printf.sprintf "%s\n%s\n" (h_key |> toStr) (h_value |> toStr)
+    )
+  |> String.concat "\n" 

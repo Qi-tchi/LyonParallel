@@ -675,8 +675,9 @@ let r1 =  Homo.fromList
   [1;2] [] 
   [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
   [(1,1);(2,2)] []
-let rl = Grs.fromHomos l1 r1
-let bruggink_2014_ex1 =  fromRulesListAndName [rl]"bruggink_2014_ex1"
+let bruggink_2014_ex1_rl = Grs.fromHomos l1 r1
+
+let bruggink_2014_ex1 =  fromRulesListAndName [bruggink_2014_ex1_rl]"bruggink_2014_ex1"
 
 (*********************
   bruggink_2014_ex_4
