@@ -10,6 +10,22 @@ module MGraph = struct
 end
 
 
+
+let%expect_test "" = 
+  let x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)] in
+  let g = MGraph.fromList [1;2;3] [] in
+  let y=MGraph.fromList [4;5;6] [(4,"a",5,7);(5,"a",6,10)] in
+  print_endline (MGraph.iso x g |> string_of_bool);
+  print_endline (MGraph.iso g x |> string_of_bool);
+  print_endline (MGraph.iso y x |> string_of_bool);
+  print_endline (MGraph.iso x y |> string_of_bool);
+  [%expect{|
+    false 
+    false
+    true
+    true
+  |}]
+
 (* let calculateAllOccurrenceOfXInG g x =
   let occurrences = List.map ~f:imgOfHomomorphism (hom x g) in 
   occurrences *)
@@ -98,7 +114,7 @@ let calculateDXR rl x =
   let r = Grs.rhs rl in
   let rightGraph = Grs.rightGraph rl in
   let interfaceGraph = Grs.interfaceGraph rl in
-  (* calculate all possible (r',k') *)
+  (* calculate all possible (r',k') *) 
   let r's = MGraph.propreSubgraphs x in
   (* let r's = List.filter (fun sg -> MGraph.isSingleton sg |> not) r's in *)
   let k'r's = List.map 
@@ -634,12 +650,17 @@ let rec isTerminating pb =
 
 let interpret pb =
   if pb.rules |> Grs.RuleSet.is_empty then 
-    print_endline "\n!!! Termination proved !!!! 
-    using successively the following ruler-graphs:\n";
-    let xs = pb.witnesses |> List.rev in
-    List.iteri 
-    (fun i (x,_) -> Printf.printf "X%d: \n \ \ \ %s\n" i (MGraph.toStr x))
-    xs
+    begin
+      print_endline "\n!!! Termination proved !!!! 
+      using successively the following ruler-graphs:\n";
+      let xs = pb.witnesses |> List.rev in
+      List.iteri 
+      (fun i (x,_) -> Printf.printf "X%d: \n \ \ \ %s\n" i (MGraph.toStr x))
+      xs
+    end
+    else
+      print_endline "unknown!"
+  
 let isTerminatingBool pb = 
   isTerminating pb |> isEmpty
 let%expect_test "isTerminating" = 

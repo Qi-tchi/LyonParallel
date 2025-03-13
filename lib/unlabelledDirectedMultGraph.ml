@@ -81,20 +81,29 @@ let isGraph g =
   ArrowSet.equal domDst ( arrows g) &&
   NodeSet.subset imgSrc (nodes g) &&
   NodeSet.subset imgDst (nodes g)
-let isSubGraphOf sg g = 
-  (NodeSet.subset (nodes sg) (nodes g)) &&
-  (ArrowSet.subset (arrows sg) (arrows g)) 
+
 
   let srcOf ~g:g ar = 
     let src = src g in
     assert(ArrowMap.mem ar src);
     ArrowMap.find ar src
   
-  let dstOf ~g:g ar = 
-    let dst = dst g in
-    assert(ArrowMap.mem ar dst);
-    ArrowMap.find ar dst
-
+let dstOf ~g:g ar = 
+  let dst = dst g in
+  assert(ArrowMap.mem ar dst);
+  ArrowMap.find ar dst
+let isSubGraphOf sg g = 
+  (NodeSet.subset (nodes sg) (nodes g)) &&
+  (ArrowSet.subset (arrows sg) (arrows g)) &&
+  (ArrowSet.for_all 
+    (fun ar ->
+      let s = srcOf ~g:sg ar in
+      let s' = srcOf ~g:g ar in
+      let t = dstOf ~g:sg ar in
+      let t' = dstOf ~g:g ar in
+      Node.equal s s' &&
+      Node.equal t t')
+    (arrows sg))
   let isArrowOf g a = ArrowSet.mem a ( arrows g)
 
   let isNodeOf g v = NodeSet.mem v (nodes g)
