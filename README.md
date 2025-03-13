@@ -36,6 +36,79 @@
    >>
    ```
 
+
+
+### Try Subgraph Counting Method with no forbidden context
+
+**Usage:**
+
+```
+systems
+```
+
+Lists all available systems.
+
+```
+>> try_subgraph_counting 41
+```
+
+Attempts to prove termination for the system at index `41`. On success:
+
+```
+!!! Termination proved !!!!
+...
+```
+
+* The subgraph counting method is defined in
+  `lib/termination.ml`
+
+---
+
+---
+
+
+### Try Subgraph Counting Method with ruler-graph with one forbidden context
+
+**Implementation Notes:**
+
+- A restricted version of the termination method with ruler-graph is implemented : a single ruler-graph with one forbidden context is considered at each iteration.
+
+**Usage:**
+
+```
+systems
+```
+
+Lists all available systems.
+
+```
+rulergraphs
+```
+
+Lists all available ruler-graphs.
+
+```
+try_subgraph_counting_one_forbidden_context 0 0
+```
+
+Attempts to prove termination for the system at index `0` with ruler-grsaph at index `0`.
+
+```
+try_subgraph_counting_one_forbidden_context 19 1
+```
+
+Attempts to prove termination for the system at index `0` with ruler-grsaph at index `0`.
+
+```
+*** Termination proved !***
+...
+```
+
+* The subgraph counting method is defined in
+  `lib/subgraph_counting_forbidden_contexts.ml`
+
+---
+
 ---
 
 ### Try Type Graph Method with Non-well-founded Semirings
@@ -94,47 +167,13 @@ Displays the constructed weighted type graphs.
 
 ---
 
-### Try Subgraph Counting Method
-
-**Implementation Notes:**
-
-- A restricted version of the termination method from Section 3 of the paper.
-- Uses a stricter non-increasing rule definition:
-  - The union of $h_{R'L}$ for all $R'\in D(R,X)$ must be an edge-injective graph homomorphism.
-  - Node-injective required if $X$ has isolated nodes.
-- Rule-set $\mathbb{X}$ is constrained to be a singleton.
-- The tool systematically evaluates every subgraph of the left-hand-side graphs in the rewriting rules.
-
-**Usage:**
-
-```
-systems
-```
-
-Lists all available systems.
-
-```
->> try_subgraph_counting 41
-```
-
-Attempts to prove termination for the system at index `41`. On success:
-
-```
-!!! Termination proved !!!!
-...
-```
-
-* The subgraph counting method is defined in
-  `lib/termination.ml`
-
----
-
 ### Available Systems
 
 * Systems are defined in:
   `lib/concreteGraphRewritingSystems.ml`
 
 ---
+
 
 ### Command Reference
 

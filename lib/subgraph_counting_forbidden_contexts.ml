@@ -1073,7 +1073,7 @@ let occs_graph_with_forbidden_context_strictly_decreasing x rho =
   end; *)
   let occs_x_r_not_forbidden = 
     match generate_occs_with_forbidden_contexts x r with _,_,occs_not_forbidden -> occs_not_forbidden in
-    Printf.sprintf "right %d \n" (List.length occs_x_r_not_forbidden) |> print_endline;
+    (* Printf.sprintf "right %d \n" (List.length occs_x_r_not_forbidden) |> print_endline; *)
   occs_x_l_not_forbidden, occs_x_r_not_forbidden
 
 
@@ -1120,42 +1120,44 @@ let%expect_test "" =
 
   List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
   ;[%expect {|
-    2 occs
-    occ 0 : nodes : [ 1;2 ]
-    arrows : [ (1,node,1,1);(2,node,2,2) ]
-    occ 1 : nodes : [ 1;2 ]
-    arrows : [ (1,node,1,1);(2,node,2,2) ]
-    
-    0 occs of the context
-    
-    2 occs not forbiddened
-    occ 0 : nodes : [ 1;2 ]
-    arrows : [ (1,node,1,1);(2,node,2,2) ]
-    occ 1 : nodes : [ 1;2 ]
-    arrows : [ (1,node,1,1);(2,node,2,2) ]
-    0 occs forbiddened
-    
-    Right
-    
-    2 occs
-    occ 0 : nodes : [ 1;3 ]
-    arrows : [ (1,node,1,1);(3,node,3,2) ]
-    occ 1 : nodes : [ 1;3 ]
-    arrows : [ (1,node,1,1);(3,node,3,2) ]
-    
-    1 occs of the context
-    occ 0 : nodes : [ 1;3 ]
-    arrows : [ (1,edge,3,3);(1,node,1,1);(3,node,3,2) ]
-    
-    1 occs not forbiddened
-    occ 0 : nodes : [ 1;3 ]
-    arrows : [ (1,node,1,1);(3,node,3,2) ]
-    1 occs forbiddened
-    occ 0 : nodes : [ 1;3 ]
-    arrows : [ (1,node,1,1);(3,node,3,2) ]
+  2 occs
+  occ 0 : nodes : [ 1;2 ]
+  arrows : [  ]
+  occ 1 : nodes : [ 1;2 ]
+  arrows : [  ]
+  
+  0 occs of the context
+  
+  2 occs not forbiddened
+  occ 0 : nodes : [ 1;2 ]
+  arrows : [  ]
+  occ 1 : nodes : [ 1;2 ]
+  arrows : [  ]
+  0 occs forbiddened
+  
+  Right
+  
+  2 occs
+  occ 0 : nodes : [ 1;3 ]
+  arrows : [  ]
+  occ 1 : nodes : [ 1;3 ]
+  arrows : [  ]
+  
+  1 occs of the context
+  occ 0 : nodes : [ 1;3 ]
+  arrows : [ (1,edge,3,3) ]
+  
+  1 occs not forbiddened
+  occ 0 : nodes : [ 1;3 ]
+  arrows : [  ]
+  1 occs forbiddened
+  occ 0 : nodes : [ 1;3 ]
+  arrows : [  ]
   |}];; 
 
 
+
+  
 let terminating_counting_subgraph_with_forbidden_context (x:Ruler_graph.rulerGraph) (grs:ConcretGraphRewritingSystems.named_grs) = 
   let terminating = ref true in
   let report = ref "" in
@@ -1177,14 +1179,6 @@ let%expect_test "" =
   Printf.sprintf "endrullis_2024_exd3\nterminating : %b\n%s" terminating report 
   |> print_endline
   ;[%expect {|
-    left graph: nodes : [ 1;2 ]
-    arrows : [ (1,node,1,1);(2,node,2,2) ]
-
-    right graph: nodes : [ 1;3 ]
-    arrows : [ (1,edge,3,3);(1,node,1,1);(3,node,3,2) ]
-
-    right 1
-
     endrullis_2024_exd3
     terminating : true
     rule 0

@@ -650,12 +650,17 @@ let rec isTerminating pb =
 
 let interpret pb =
   if pb.rules |> Grs.RuleSet.is_empty then 
-    print_endline "\n!!! Termination proved !!!! 
-    using successively the following ruler-graphs:\n";
-    let xs = pb.witnesses |> List.rev in
-    List.iteri 
-    (fun i (x,_) -> Printf.printf "X%d: \n \ \ \ %s\n" i (MGraph.toStr x))
-    xs
+    begin
+      print_endline "\n!!! Termination proved !!!! 
+      using successively the following ruler-graphs:\n";
+      let xs = pb.witnesses |> List.rev in
+      List.iteri 
+      (fun i (x,_) -> Printf.printf "X%d: \n \ \ \ %s\n" i (MGraph.toStr x))
+      xs
+    end
+    else
+      print_endline "unknown!"
+  
 let isTerminatingBool pb = 
   isTerminating pb |> isEmpty
 let%expect_test "isTerminating" = 

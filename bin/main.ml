@@ -129,6 +129,18 @@ let cmd_systems () =
   let sys_names = List.mapi (fun i (s:ConcretGraphRewritingSystems.named_grs) -> Printf.sprintf "%d.%s" i s.name) systems in
     let s = String.concat "\n" sys_names in
     print_endline s
+let cmd_show_ruler_graphs () =
+  List.iteri 
+    (fun i ((rulergraph:Ruler_graph.rulerGraph), name,description) ->
+      Printf.sprintf "ruler graph %d : \ngraph: %s\n forbidden context: %s\nname: %s\ndescription: %s\n\n"
+      i 
+      (MGraph.toStr (rulergraph.x))
+      (MGraph.toStr (rulergraph.fx |> Option.get|>GraphHomomorphism.codom))
+      name
+      description 
+      |> print_endline
+    ) 
+    Ruler_graph.ruler_graphs
 let cmd_try_typegraph_processing system auto_defaut_strategies timeout =
   try
     let system = int_of_string system in
@@ -171,13 +183,22 @@ let cmd_try_typegraph system auto_defaut_strategies time =
   cmd_showme ();
 ;;
 
-let cmd_try_subgraph_counting system =
+let cmd_try_subgraph_counting_no_forbidden_context system =
   (* todo : unify two systems *)
   let system = List.nth systems system in
   let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
   let res = Termination.isTerminating pb in
   let _ = Termination.interpret res in
   ()
+;;
+
+let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
+  (* todo : unify two systems *)
+  let system = List.nth systems system in
+  let (rulergraph,_,description) = List.nth Ruler_graph.ruler_graphs rulergraph in
+  match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context rulergraph system with
+  | true, report -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: " report |> print_endline
+  | false, report -> Printf.sprintf "  *** Unknown ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline
 ;;
 
 let handle_command cmd =
@@ -187,12 +208,14 @@ let handle_command cmd =
   | ["exit"] -> `Exit
   | ["timeout"; t] -> `timeout (float_of_string t)
   | ["systems"] -> `Systems
+  | ["rulergraphs"] -> `show_ruler_graphs
   | ["select"; n] -> cmd_select_processing n cmd
   | ["reset_strategies"] -> `Reset_strategies 
   | ["showme"] -> `show_certificat
   | ["run"] -> `run
   | "try_type_graph" :: system :: timeout :: auto_defaut_strategies -> cmd_try_typegraph_processing system auto_defaut_strategies timeout
-  | "try_subgraph_counting" :: system :: []-> `try_subgraph_counting (int_of_string system)
+  | "try_subgraph_counting_no_forbidden_context" :: system :: []-> `try_subgraph_counting_no_forbidden_context (int_of_string system)
+  | "try_subgraph_counting_one_forbidden_context" :: system :: [rg]-> `try_subgraph_counting_one_forbidden_context (int_of_string system, int_of_string rg)
   | ["recap"] -> `recap 
   | ["help"] ->
     `Print_help_msg 
@@ -245,8 +268,8 @@ QUICK-TEST COMMANDS
    - Test type graph method with semiring combo (e.g., `try_type_graph 2 ant 60`)
    - <STRATS>: Letter combo (a=Real Arctic, A=Int Arctic, t/T= Tropical, n/N=Arithmetic)
 
-  try_subgraph_counting <SYS_ID>  
-   - Test subgraph counting method (e.g., `try_subgraph_counting 0`)
+  try_subgraph_counting_no_forbidden_context <SYS_ID>  
+   - Test subgraph counting method (e.g., `try_subgraph_counting_no_forbidden_context 0`)
 
 EXAMPLES
   1. Prove termination for system 0 with Arctic int:
@@ -256,7 +279,7 @@ EXAMPLES
      >> run
 
   2. Try multiple semirings quickly:
-     >> try_type_graph 3 ANT 120  # Arctic(int) + Tropical(int) + Arithmetic(int)
+     >> try_type_graph 3 120 A N T  # Arctic(int) + Tropical(int) + Arithmetic(int)
   "
   | "add_parallel_strategy_auto" :: coefficient :: semiring :: maxSize :: maxWeight :: optimized :: [] -> 
     begin  
@@ -331,6 +354,7 @@ let rec repl () =
       | `Exit ->
           print_endline "Goodbye!"
       | `Systems -> cmd_systems ()
+      | `show_ruler_graphs -> cmd_show_ruler_graphs ()
       | `System n -> cmd_select_system n
       | `show_certificat -> cmd_showme ()
       | `run -> cmd_run ()
@@ -343,7 +367,8 @@ let rec repl () =
       | `Method app ->
         cmd_add_strategy app
       | `recap -> cmd_recap ()
-      | `try_subgraph_counting system -> cmd_try_subgraph_counting system
+      | `try_subgraph_counting_no_forbidden_context system -> cmd_try_subgraph_counting_no_forbidden_context system
+      | `try_subgraph_counting_one_forbidden_context args -> cmd_try_subgraph_counting_one_forbidden_context args
       
     with
     (* Handle Ctrl+D (end of input) gracefully *)
