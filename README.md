@@ -39,6 +39,8 @@
 
 
 ### Try Subgraph Counting Method with no forbidden context
+**Implementation Notes:**
+The tool automatically tries all subgraphs of the left-hand side graphs of all rewriting rules.
 
 **Usage:**
 
@@ -52,7 +54,9 @@ Lists all available systems.
 >> try_subgraph_counting 41
 ```
 
-Attempts to prove termination for the system at index `41`. On success:
+Attempts to prove termination for the system at index `41`.
+
+On success:
 
 ```
 !!! Termination proved !!!!
@@ -98,6 +102,8 @@ try_subgraph_counting_one_forbidden_context 19 1
 ```
 
 Attempts to prove termination for the system at index `0` with ruler-grsaph at index `0`.
+
+On success:
 
 ```
 *** Termination proved !***
