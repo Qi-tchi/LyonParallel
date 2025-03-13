@@ -52,7 +52,40 @@ let fromGraphsAndMaps g g' hv he  =
     ArrowMap.bindings he |> List.map fst |> ArrowSet.of_list, 
     ArrowMap.bindings he |> List.map snd |> ArrowSet.of_list in
   (* hv well defined function from V(g) to V(g') *)
-  assert(NodeSet.equal dom_hv (MGraph.nodes g)); 
+
+(* Vérification des ensembles de nœuds *)
+if (NodeSet.equal dom_hv (MGraph.nodes g)) |> not then 
+  failwith "dom_hv ne correspond pas aux nœuds de g" else
+
+if (NodeSet.subset img_hv (MGraph.nodes g')) |> not then 
+  failwith "img_hv n'est pas un sous-ensemble des nœuds de g'"else
+
+(* Vérification des flèches *)
+if (ArrowSet.equal dom_he (MGraph.arrows g)) |> not then 
+  failwith "dom_he ne correspond pas aux flèches de g"else
+
+if (ArrowSet.subset img_he (MGraph.arrows g')) |> not then 
+  failwith "img_he n'est pas un sous-ensemble des flèches de g'" else
+
+(* Vérification de la préservation des flèches *)
+let ars = MGraph.arrows g in
+if 
+  ArrowSet.for_all 
+    (fun x -> 
+      let y = heX he x in 
+      let xs, xt = MGraph.srcDstOf g x in
+      let xs', xt' = hvX hv xs, hvX hv xt in
+      let ys, yt = MGraph.srcDstOf g' y in
+      (* Vérifier si les sources, destinations et labels sont préservés *)
+      Node.equal xs' ys && 
+      Node.equal xt' yt &&
+      MGraph.Label.equal (MGraph.labelOf g x) (MGraph.labelOf g' y)
+    ) ars
+  |> not
+then 
+  failwith "La préservation des flèches a échoue" else
+    
+  (* assert(NodeSet.equal dom_hv (MGraph.nodes g)); 
   assert(NodeSet.subset img_hv (MGraph.nodes g'));
   (* he well defined function from E(g) to E(g') *)
   assert(ArrowSet.equal dom_he (MGraph.arrows g));
@@ -69,7 +102,7 @@ let fromGraphsAndMaps g g' hv he  =
               Node.equal xs' ys && Node.equal xt' yt &&
               MGraph.labelOf g x |> MGraph.Label.equal (MGraph.labelOf g' y)
               )
-    ars);
+    ars); *)
   {dom = g; codom = g'; hv=hv;he=he}
 let fromGraphsAndMaps_opt g g' hv he =
   try Some (fromGraphsAndMaps g g' hv he) with _ -> None

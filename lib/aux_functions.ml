@@ -94,7 +94,9 @@ let rec combinations k = function
 
 (* Main function to generate k-length arrangements *)
 let arrangements k l =
-if k < 1 || k > List.length l then []
+if k < 0 then [] else
+if k = 0 then [[]] else
+if k > List.length l then []
 else
   combinations k l
   |> List.concat_map permutations
@@ -114,3 +116,16 @@ let inj_maps_from_to l1 l2 =
       ) 
       arrangs
   end
+
+(**
+  takes two lists, l1 and l2. Both lists are of the same length. Each element in l2 is itself a list. The function should return all possible attributions where each element in l1 is assigned an element from the corresponding list in l2.
+*)
+let attributions l1 l2 =
+  let rec product = function
+    | [] -> [[]]
+    | h :: t ->
+      let rest = product t in
+      List.concat (List.map (fun x -> List.map (fun ys -> x :: ys) rest) h)
+  in
+  let product_lists = product l2 in
+  List.map (fun p -> List.map2 (fun a b -> (a, b)) l1 p) product_lists

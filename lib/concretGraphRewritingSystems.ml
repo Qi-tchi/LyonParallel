@@ -93,20 +93,20 @@ let endrullis_2023_ex6_4 =Termination.pbFromList [endrullis_2023_ex6_4_rule1]
 (*********************
   endrullis_2024_exd3
 *****************************)
-let r1l = 
+let endrullis_2024_exd3_r1l = 
   Homo.fromList   
   [1] [] 
   [1;2] [(1,"node",1,1);(2,"node",2,2)]
   [(1,1)] []
-let r1r = 
+let endrullis_2024_exd3_r1r = 
   Homo.fromList   
   [1] [] 
-  [1;2] [(1,"e",2,3);(1,"node",1,1);(2,"node",2,2)]
+  [1;3] [(1,"edge",3,3);(1,"node",1,1);(3,"node",3,2)]
   [(1,1)] []
-let r1 = Grs.fromHomos r1l r1r
+let endrullis_2024_exd3_r1 = Grs.fromHomos endrullis_2024_exd3_r1l endrullis_2024_exd3_r1r
 
-let endrullis_2024_exd3_problem =Termination.pbFromList [r1] 
-let endrullis_2024_exd3 = fromRulesListAndName [r1] "endrullis_2024_exd3" ~monic_matching:false
+let endrullis_2024_exd3_problem =Termination.pbFromList [endrullis_2024_exd3_r1] 
+let endrullis_2024_exd3 = fromRulesListAndName [endrullis_2024_exd3_r1] "endrullis_2024_exd3" ~monic_matching:false
 
 
 (*********************
@@ -688,7 +688,7 @@ let bruggink_2014_ex_4_l = Homo.fromList
   [(1,1);(2,2)] []
 let bruggink_2014_ex_4_r = Homo.fromList
   [1;2] []
-  [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3);]
+  [1;2;4;5] [(1,"a",4,1);(4,"b",5,2);(5,"a",2,3);]
   [(1,1);(2,2)] []
 let bruggink_2014_ex_4 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
 let bruggink_2014_ex_4_rl_1 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
