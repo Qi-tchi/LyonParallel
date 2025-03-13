@@ -36,9 +36,8 @@
    >>
    ```
 
-
-
 ### Try Subgraph Counting Method with no forbidden context
+
 **Implementation Notes:**
 The tool automatically tries all subgraphs of the left-hand side graphs of all rewriting rules.
 
@@ -51,7 +50,7 @@ systems
 Lists all available systems.
 
 ```
->> try_subgraph_counting 41
+>> try_subgraph_counting_no_forbidden_context 41
 ```
 
 Attempts to prove termination for the system at index `41`.
@@ -69,7 +68,6 @@ On success:
 ---
 
 ---
-
 
 ### Try Subgraph Counting Method with ruler-graph with one forbidden context
 
@@ -179,7 +177,6 @@ Displays the constructed weighted type graphs.
   `lib/concreteGraphRewritingSystems.ml`
 
 ---
-
 
 ### Command Reference
 
