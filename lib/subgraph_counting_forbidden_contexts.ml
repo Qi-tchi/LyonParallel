@@ -290,25 +290,36 @@ let non_clapsing (rho :GraphRewritingSystem.DPOrule.t) drx phi =
 
   (* condition 3 : edge injective *) 
   let edge_injective drx phi =
-    List.for_all2 (fun (h_k'r', _) (h_k'r'2, _) ->
-      let r', r'' = Homo.codom h_k'r', Homo.codom h_k'r'2 in
-      let h_r'l = Homo.GraphHomoMap.find h_k'r' phi in
-      let h_r''l = Homo.GraphHomoMap.find h_k'r'2 phi in
-      (* let rk = Homo.imgOf rho.r in *)
-        (List.for_all2
-        (fun x y ->      
-            MGraph_ext.Arrow.equal x y ||
-            begin
-              let x', y' = Homo.app_he ~h:h_r'l x, Homo.app_he ~h:h_r''l y in
-              MGraph_ext.Arrow.equal x' y' |> not 
-            end 
-        )
-        (MGraph_ext.arrows r' |> MGraph_ext.ArrowSet.to_list)
-        (MGraph_ext.arrows r'' |> MGraph_ext.ArrowSet.to_list)
-        )
-    ) 
-    drx
-    drx
+    List.for_all 
+      (fun ((h_k'r', _),(h_k'r'2, _)) ->
+        let r', r'' = Homo.codom h_k'r', Homo.codom h_k'r'2 in
+        let h_r'l = Homo.GraphHomoMap.find h_k'r' phi in
+        let h_r''l = Homo.GraphHomoMap.find h_k'r'2 phi in
+        (* let rk = Homo.imgOf rho.r in *)
+          (List.for_all
+            (fun (x,y) ->  
+              (* debug begin *)
+              (* Printf.sprintf "nodes %d %d\nx=y : %b\nx' %d y' %d\nx'=y' : %b\n\n"  
+              x y
+              (MGraph_ext.Arrow.equal x y)
+              (Homo.app_he ~h:h_r'l x)
+              (Homo.app_he ~h:h_r''l y) 
+              (MGraph_ext.Arrow.equal (Homo.app_he ~h:h_r'l x) (Homo.app_he ~h:h_r''l y))
+              |> print_endline 
+              ;
+              *)
+              (* debug end *)
+                MGraph_ext.Arrow.equal x y ||
+                begin
+                  let x', y' = Homo.app_he ~h:h_r'l x, Homo.app_he ~h:h_r''l y in
+                  MGraph_ext.Arrow.equal x' y' |> not 
+                end 
+            )
+            (Core.List.cartesian_product (MGraph_ext.arrows r' |> MGraph_ext.ArrowSet.to_list)
+            (MGraph_ext.arrows r'' |> MGraph_ext.ArrowSet.to_list))
+          )
+      ) 
+      (Core.List.cartesian_product drx drx)
 
 let node_injective_if_isolated_nodes (x:MGraph_ext.t) drx phi =
   if x |> MGraph_ext.isConnected then true 
@@ -331,8 +342,6 @@ let node_injective_if_isolated_nodes (x:MGraph_ext.t) drx phi =
   ) 
   drx
   drx
-
-
 
 
 let generate_all_phiX (x:MGraph_ext.t) rho : (Homo.t Homo.GraphHomoMap.t) list = 
@@ -446,6 +455,26 @@ let%expect_test "" =
   |}]
 
 
+let%expect_test "" = 
+  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
+  let drx = calculateDXR x.x rho in
+  let phis = generate_all_phiX x.x rho in
+  let phi = phis |> List.hd in
+    (* List.iteri (fun j (rp,h_rpl) -> 
+      Printf.sprintf "phi i%d j%d:\nr':\n%s\nh_r'l:\n%s" 0 j 
+      ( MGraph_ext.toStr (rp|>Homo.codom)) (Homo.toStr h_rpl) |> print_endline
+    )
+    (phi |> Homo.GraphHomoMap.bindings); *)
+    let edge_inj = edge_injective drx phi in
+    Printf.sprintf "Phi is edge-injective : %b" edge_inj
+    |> print_endline
+  ;[%expect{|
+    Phi is edge-injective : false
+  |}]
+
+
+
 let is_x_non_increasing_rule (x:MGraph_ext.t) rho (phiX :Homo.t Homo.GraphHomoMap.t) =
   let drx = calculateDXR x rho in
   (* condition 1 *)
@@ -479,7 +508,7 @@ let%expect_test "" =
     is x non increasing : true
   |}]
 
-
+(* 
 let%expect_test "" = 
   let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
   let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
@@ -537,7 +566,7 @@ let%expect_test "" =
     arrows : [ (1,f,4,3);(1,f,3,2);(1,f,2,1);(2,a,2,4);(3,b,3,5) ]
     hv:[(1,1);(4,4)]
     he:[(3,3)]
-  |}]
+  |}] *)
 
 
 

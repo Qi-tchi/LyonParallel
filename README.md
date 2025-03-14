@@ -40,10 +40,7 @@
 
 **Implementation Notes:**
 - The tool automatically tries all subgraphs of the left-hand side graphs of all rewriting rules.
-- Uses a stricter non-increasing rule definition:
-  - The union of $h_{R'L}$ for all $R'\in D(R,X)$ must be an edge-injective graph homomorphism.
-  - Node-injective required if $X$ has isolated nodes.
-- Rule-set $\mathbb{X}$ is constrained to be a singleton.
+- A restricted version is implemented : Rule-set $\mathbb{X}$ is constrained to be a singleton.
 **Usage:**
 
 ```

@@ -404,7 +404,26 @@ let isInjOnNodes h =
   let img = 
     hv |> NodeMap.bindings |> List.map snd |> NodeSet.of_list in
   Int.equal (dom h |> MGraph.order) (img |> NodeSet.cardinal)
-
+(* test : plump 2018 ex6 rule *)
+let%expect_test _ = 
+  let r2_l = fromList 
+  [1;2;3] [(3,"0",3,3)]
+  [1;2;3] [(1,"+",2,1);(1,"+",3,2);(3,"0",3,3)]
+  [(1,1);(2,2);(3,3)] 
+  [(3,3)] in
+  let r2_r = fromList 
+    [1;2;3] [(3,"0",3,3)]
+    [1;3] [(3,"0",3,3)]
+      [(1,1);(2,1);(3,3)] 
+      [(3,3)] in
+  Printf.sprintf "r2_l is node-injective : %b \nr2_r is node-injective : %b\n"
+  (r2_l |> isInjOnNodes)
+  (r2_r |> isInjOnNodes)
+  |> print_endline
+  ;[%expect{|
+    r2_l is node-injective : true
+    r2_r is node-injective : false
+  |}]
 (* test : injective on vertices*)
 let%test _ = 
   fromList [1;2] [(1,"a",2,1)] [1;2;3;4] [(1,"a",3,1);(3,"b",4,2);(4,"a",2,3)] [(1,1);(2,3)] [(1,1)] |> isInjOnNodes

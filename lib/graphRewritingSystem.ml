@@ -177,3 +177,24 @@ type grs = RuleSet.t
   let labels_l grs = labels grs |> LabelSet.elements
 let fromGls (gls: Gls.t) = 
   List.map DPOrule.fromGlsRule gls.rules |> RuleSet.of_list
+let isInjectiveRule rl =
+  Homo.isInj (rl |> lhs) && Homo.isInj (rl |> rhs)
+
+let%expect_test _ = 
+  let r2_l = Homo.fromList 
+    [1;2;3] [(3,"0",3,3)]
+    [1;2;3] [(1,"+",2,1);(1,"+",3,2);(3,"0",3,3)]
+    [(1,1);(2,2);(3,3)] 
+    [(3,3)] in
+  let r2_r = Homo.fromList 
+  [1;2;3] [(3,"0",3,3)]
+  [1;3] [(3,"0",3,3)]
+    [(1,1);(2,1);(3,3)] 
+    [(3,3)] in
+  let plump_2018_ex6_r2 = fromHomos r2_l r2_r in
+  Printf.sprintf "r2 is injective : %b"
+  (isInjectiveRule plump_2018_ex6_r2)
+  |> print_endline
+  ;[%expect{|
+    r2 is injective : false
+  |}]

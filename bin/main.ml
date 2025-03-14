@@ -197,8 +197,8 @@ let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
   let system = List.nth systems system in
   let (rulergraph,_,description) = List.nth Ruler_graph.ruler_graphs rulergraph in
   match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context rulergraph system with
-  | true, report -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: " report |> print_endline
-  | false, report -> Printf.sprintf "  *** Unknown ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline
+  | true, report -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline
+  | false, report -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
 ;;
 
 let handle_command cmd =

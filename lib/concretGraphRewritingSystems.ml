@@ -875,21 +875,34 @@ let bonfante_2023_main_ex_follow = Grs.fromLists kvs kes lvs les rvs res lhv lhe
 let bonfante_2023_main_ex = pbFromList [bonfante_2023_main_ex_follow]  
 
 (* endrullis ex 6.9 *)
-let r1_r = Homo.fromList 
-  [1;2;3] [(1,"s",3,1);(3,"0",3,2)]
-  [1;2;3;4] [(1,"s",3,1);(3,"0",3,2); (2,"s",4,3); (4,"0",4,4)]
-  [(1,1);(2,2);(3,3)] 
-  [(1,1); (2,2)]
- 
 let r1_l = Homo.fromList 
   [1;2;3] [(1,"s",3,1);(3,"0",3,2)]
   [1;2;3] [(1,"s",3,1);(3,"0",3,2); (2,"s",3,3)]
   [(1,1);(2,2);(3,3)] 
   [(1,1); (2,2)]
-
+let r1_r = Homo.fromList 
+  [1;2;3] [(1,"s",3,1);(3,"0",3,2)]
+  [1;2;3;4] [(1,"s",3,1);(3,"0",3,2); (2,"s",4,3); (4,"0",4,4)]
+  [(1,1);(2,2);(3,3)] 
+  [(1,1); (2,2)]
 let plump_2018_ex6_r1 = Grs.fromHomos r1_l r1_r
-let plump_2018_ex6_problem =  pbFromList [plump_2018_ex6_r1]
-let plump_2018_ex6 = fromRulesListAndName [plump_2018_ex6_r1] "plump_2018_ex6"
+let r2_l = Homo.fromList 
+  [1;2;3] [(3,"0",3,3)]
+  [1;2;3] [(1,"+",2,1);(1,"+",3,2);(3,"0",3,3)]
+  [(1,1);(2,2);(3,3)] 
+  [(3,3)]
+let r2_r = Homo.fromList 
+[1;2;3] [(3,"0",3,3)]
+[1;3] [(3,"0",3,3)]
+  [(1,1);(2,1);(3,3)] 
+  [(3,3)]
+let plump_2018_ex6_r2 = Grs.fromHomos r2_l r2_r
+
+let plump_2018_ex6_problem =  pbFromList [plump_2018_ex6_r1; plump_2018_ex6_r2]
+let plump_2018_ex6 = fromRulesListAndName [plump_2018_ex6_r1; plump_2018_ex6_r2] "plump_2018_ex6"
+
+let plump_2018_ex6_one_rule_copy = fromRulesListAndName [plump_2018_ex6_r1] "plump_2018_ex6_one_rule_copy"
+
 
 (* endrullis ex 6.9 variant *)
 
@@ -906,8 +919,8 @@ let r1_r = Homo.fromList
 
 let plump_2018_ex6_variant_r1 = Grs.fromHomos r1_l r1_r
 (* let plump_2018_ex6_variant_problem =  pbFromList [plump_2018_ex6_variant_r1] *)
-let plump_2018_ex6_variant = fromRulesListAndName [plump_2018_ex6_variant_r1] "plump_2018_ex6_discret_interface"
-let plump_2018_ex6_variant_monic = fromRulesListAndName ~monic_matching:true [plump_2018_ex6_variant_r1] "plump_2018_ex6_variant_monic"
+let plump_2018_ex6_variant = fromRulesListAndName [plump_2018_ex6_variant_r1] "plump_2018_ex6_one_rule_copy_with_discret_interface"
+(* let plump_2018_ex6_variant_monic = fromRulesListAndName ~monic_matching:true [plump_2018_ex6_variant_r1] "plump_2018_ex6_variant_monic" *)
 
 
 (* Example 45 *)
@@ -1333,9 +1346,10 @@ let grss =
   plump_2018_ex4;
   plump_2018_ex5;
   plump_2018_ex6;
+  plump_2018_ex6_one_rule_copy;
   plump_2018_ex6_variant;
   plump_2018_fig10;
-  plump_2018_ex6_variant_monic
+  (* plump_2018_ex6_variant_monic *)
 ] @ [  
   metivier_1995_majAB;
   metivier_1995_majAB_rules_1_2_5_7_8_only;

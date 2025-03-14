@@ -587,13 +587,13 @@ let isX x ~rules =
   (* every rule creates more occurrences of X on the left
     Or  
       X-non-increasing *)
-  Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules 
+  (* Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules  *)
 
   (* Complete version *)
-  (* Grs.RuleSet.for_all 
+  Grs.RuleSet.for_all 
     ( let x:Ruler_graph.rulerGraph = {x = x; fx = None} in
       Subgraph_counting_forbidden_contexts.is_x_non_increasing_rule_forSomePhi x) 
-    rules *)
+    rules
 
 
 
@@ -615,10 +615,22 @@ let isX x ~rules =
       (isX x ~rules)
   ;[%expect{| isX [x] grs_ex69_r1 = true |}]   *)
   
-
+let isInjectiveSys (pb:problem) = 
+  RuleSet.for_all (Grs.isInjectiveRule) pb.rules
+let%expect_test "" = 
+  Printf.sprintf "plump_2018_ex6 is injective system ? : %b"
+  (isInjectiveSys ConcretGraphRewritingSystems.plump_2018_ex6_problem)
+  |> print_endline
+;[%expect{|
+  plump_2018_ex6 is injective system ? : false
+|}]
 
 let rec isTerminating (pb:problem) =
-  match Grs.RuleSet.is_empty pb.rules with
+  let injective_sys = RuleSet.for_all (Grs.isInjectiveRule) pb.rules in
+  if not injective_sys then begin
+    print_endline "Not supported systems"; pb 
+  end else
+  match Grs.RuleSet.is_empty pb.rules with 
   |true -> pb (* if terminating *)
   |false ->
       begin
@@ -641,7 +653,7 @@ let interpret (pb:problem) =
       xs
     end
     else
-      print_endline "unknown!"
+      print_endline "termination unknown!"
   
 let isTerminatingBool pb = 
   isTerminating pb |> (ConcretGraphRewritingSystems.isEmpty)
