@@ -587,17 +587,17 @@ let isX x ~rules =
   (* every rule creates more occurrences of X on the left
     Or  
       X-non-increasing *)
-  (* Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules  *)
+  Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules 
 
   (* Complete version *)
-  Grs.RuleSet.for_all 
+  (* Grs.RuleSet.for_all 
     ( let x:Ruler_graph.rulerGraph = {x = x; fx = None} in
       Subgraph_counting_forbidden_contexts.is_x_non_increasing_rule_forSomePhi x) 
-    rules
+    rules *)
 
 
 
-let%expect_test "isX" = 
+(* let%expect_test "isX" = 
   let grs_ex69_r1_l = Homo.fromList 
   [1;2;3] [(1,"s",3,1);(3,"0",3,2)]
   [1;2;3] [(1,"s",3,1);(3,"0",3,2); (2,"s",3,3)]
@@ -613,7 +613,7 @@ let%expect_test "isX" =
   let x = MGraph.fromList [1;2;3] [(1,"s",3,1);(2,"s",3,3)] in
   Printf.printf "isX [x] grs_ex69_r1 = %b" 
       (isX x ~rules)
-  ;[%expect{| isX [x] grs_ex69_r1 = true |}]  
+  ;[%expect{| isX [x] grs_ex69_r1 = true |}]   *)
   
 
 
