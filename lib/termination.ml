@@ -1,30 +1,8 @@
 module Homo = GraphHomomorphism
 module Grs = GraphRewritingSystem
 module RuleSet = GraphRewritingSystem.RuleSet
-
-module MGraph = struct 
-  include MGraph
-  let iso g g' = 
-    let homos = Homo.homSet g g' in
-    List.exists Homo.isIso homos
-end
-
-
-
-let%expect_test "" = 
-  let x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)] in
-  let g = MGraph.fromList [1;2;3] [] in
-  let y=MGraph.fromList [4;5;6] [(4,"a",5,7);(5,"a",6,10)] in
-  print_endline (MGraph.iso x g |> string_of_bool);
-  print_endline (MGraph.iso g x |> string_of_bool);
-  print_endline (MGraph.iso y x |> string_of_bool);
-  print_endline (MGraph.iso x y |> string_of_bool);
-  [%expect{|
-    false 
-    false
-    true
-    true
-  |}]
+module MGraph = MGraph_ext
+type problem = ConcretGraphRewritingSystems.problem
 
 (* let calculateAllOccurrenceOfXInG g x =
   let occurrences = List.map ~f:imgOfHomomorphism (hom x g) in 
@@ -65,12 +43,12 @@ let%expect_test "" =
 (************************
     calculateRx et ses aux funcs
 ****************************)
-let calculateRx rl x = 
+let calculateRx rl x =  
   (* assert(x |> MGraph.isConnected);  *)
   let r = Grs.rhs rl in
   let rightGraph = Grs.rightGraph rl in
   let interfaceGraph = Grs.interfaceGraph rl in
-  (* calculate all possible (r',k') *)
+  (* calculate all possible (r',k') *) 
   let r's = MGraph.propreSubgraphs x in
   (* let r's = List.filter (fun sg -> MGraph.isSingleton sg |> not) r's in *)
   let k'r's = List.map 
@@ -153,7 +131,7 @@ let calculateDXR rl x =
   let triples = 
     List.filter
     (fun (hk'r', (hr'r, _)) -> 
-      let im1 = Homo.imgOf hr'r in
+      let im1 = Homo.imgOf hr'r in 
       let im2 = Homo.imgOf r in
       let inter = MGraph.intersectionOfSubGraphs im1 im2 in
       let hk'r = Homo.composition hk'r' hr'r in
@@ -596,12 +574,6 @@ let hasStrictlyMoreOccurrencesOnleft x rl =
   let homoXR = List.filter Homo.isInjOnArrows homoXR in
   (homoXL |> List.length) > (homoXR |> List.length)
 
-type problem = {
-  witnesses: (MGraph.Graph.t * Grs.RuleSet.t) list;
-  rules : Grs.RuleSet.t;
-}
-let isEmpty pb = Grs.RuleSet.is_empty pb.rules
-let pbFromList rules = {rules = Grs.RuleSet.of_list rules; witnesses =[]}
 
 let isX x ~rules = 
   (* connected *)
@@ -610,10 +582,20 @@ let isX x ~rules =
   Grs.RuleSet.for_all (hasMoreOccurrencesOnleft x) rules &&
   (* there is a rule which has strictly more X occurrence on the left *)
   Grs.RuleSet.exists (hasStrictlyMoreOccurrencesOnleft x) rules &&
+
+  (* restricted version   *)
   (* every rule creates more occurrences of X on the left
     Or  
       X-non-increasing *)
-  Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules 
+  (* Grs.RuleSet.for_all (createsMoreXOnTheLeftBool x) rules  *)
+
+  (* Complete version *)
+  Grs.RuleSet.for_all 
+    ( let x:Ruler_graph.rulerGraph = {x = x; fx = None} in
+      Subgraph_counting_forbidden_contexts.is_x_non_increasing_rule_forSomePhi x) 
+    rules
+
+
 
 let%expect_test "isX" = 
   let grs_ex69_r1_l = Homo.fromList 
@@ -635,7 +617,7 @@ let%expect_test "isX" =
   
 
 
-let rec isTerminating pb =
+let rec isTerminating (pb:problem) =
   match Grs.RuleSet.is_empty pb.rules with
   |true -> pb (* if terminating *)
   |false ->
@@ -648,7 +630,7 @@ let rec isTerminating pb =
         with Not_found -> pb (* if no rule can be eliminated *)
       end
 
-let interpret pb =
+let interpret (pb:problem) =
   if pb.rules |> Grs.RuleSet.is_empty then 
     begin
       print_endline "\n!!! Termination proved !!!! 
@@ -662,7 +644,7 @@ let interpret pb =
       print_endline "unknown!"
   
 let isTerminatingBool pb = 
-  isTerminating pb |> isEmpty
+  isTerminating pb |> (ConcretGraphRewritingSystems.isEmpty)
 let%expect_test "isTerminating" = 
   let bruggink_2014_example_4_l = Homo.fromList
     [1;2] [] 
@@ -679,12 +661,12 @@ let%expect_test "isTerminating" =
   Printf.printf "\nsubgraphs: %d" (subgraphs |> List.length);
   let x = List.find (isX ~rules:([bruggink_2014_example_4] |> Grs.RuleSet.of_list)) subgraphs in
   Printf.printf "\nfirst x: \n%s" (x |> MGraph.toStr);
-  let pb = pbFromList [bruggink_2014_example_4] in
+  let pb : problem = ConcretGraphRewritingSystems.pbFromList [bruggink_2014_example_4] in
   Printf.printf "\nbruggink_2014_example_4 is terminating : %b" (isTerminatingBool pb);
   let eliminatedRules, remainedRules = Grs.RuleSet.partition (hasStrictlyMoreOccurrencesOnleft x) pb.rules in 
   Printf.printf "\nEliminated: %d rules ;  Remained : %d rules\n"
   (eliminatedRules |> Grs.RuleSet.cardinal) (remainedRules |> Grs.RuleSet.cardinal);
-  let pb' = { witnesses=(x,eliminatedRules)::pb.witnesses; rules= remainedRules} in
+  let pb':problem = { witnesses=(x,eliminatedRules)::pb.witnesses; rules= remainedRules} in
   Printf.printf "pb' is terminating : %b" (pb' |> isTerminatingBool);
   [%expect{|
     lhsGraphs: 1
@@ -710,7 +692,7 @@ let%expect_test "isTerminating" =
     [(1,1); (2,2)] in 
   let grs_ex69_r1 = Grs.fromHomos grs_ex69_r1_l grs_ex69_r1_r in
   (* let x = MGraph.fromList [1;2;3] [(1,"s",3,1);(2,"s",3,3)] in *)
-  let pb = pbFromList [grs_ex69_r1] in
+  let pb :problem = ConcretGraphRewritingSystems.pbFromList [grs_ex69_r1] in
   (* let lhsGraphs = List.map (fun r -> r |> Grs.lhs |> Homo.codom) (pb.rules |> Grs.RuleSet.to_list) in
   let subgraphs = List.map MGraph.subGraphs lhsGraphs |> List.concat in
   Printf.printf "\nisX [x] = %b\n" (isX x ~rules:pb.rules); *)
@@ -734,10 +716,10 @@ let%expect_test "isTerminating" =
   [(1,1); (2,2); (3,3)] 
   [] in
   let grs_ex69_variant_r1 = Grs.fromHomos grs_ex69_variant_r1_l grs_ex69_variant_r1_r in
-  let pb = pbFromList [grs_ex69_variant_r1] in
+  let pb = ConcretGraphRewritingSystems.pbFromList [grs_ex69_variant_r1] in
   pb |> isTerminatingBool |> Printf.printf "[grs_grs_ex69_variant_r1ex69_r1] is terminating : %b";
   ;[%expect{| [grs_grs_ex69_variant_r1ex69_r1] is terminating : true |}]
 
-let print_grs pb = List.iteri 
+let print_grs (pb:problem) = List.iteri 
   (fun i rl -> Printf.printf "rule %d : \n %s" i (rl |> GraphRewritingSystem.toStr_left_interface_right))
   (pb.rules |> GraphRewritingSystem.RuleSet.elements)

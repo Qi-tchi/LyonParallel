@@ -1,4 +1,4 @@
-module Homo = GraphHomomorphism
+(* module Homo = GraphHomomorphism
 module Grs = GraphRewritingSystem
 module RuleSet = GraphRewritingSystem.RuleSet
 module Rule = GraphRewritingSystem.DPOrule
@@ -895,4 +895,4 @@ let generate_phi_forbidden_context (x:rulerGraph) rho
   (*  *)
   (* Condition 3 *)
   predictable_cond3 x rho
- *)
+ *) *)

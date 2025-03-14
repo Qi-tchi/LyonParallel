@@ -7,8 +7,15 @@ type named_grs = {
   monic_matching : bool;  
 }
 
+type problem = {
+  witnesses: (MGraph.Graph.t * Grs.RuleSet.t) list;
+  rules : Grs.RuleSet.t;
+}
+let isEmpty pb = Grs.RuleSet.is_empty pb.rules
+let pbFromList rules = {rules = Grs.RuleSet.of_list rules; witnesses =[]}
+
 let named_grs_to_problem s = 
-  Termination.pbFromList s.grs
+  pbFromList s.grs 
 
 let fromRulesListAndName ?(monic_matching=false) rls name  = 
   {grs=rls; name; monic_matching}
@@ -43,7 +50,7 @@ let r1r =
   [(1,1);(2,2)] []
 let r1 = Grs.fromHomos r1l r1r
 let endrullis_2024_ex6_2 = fromRulesListAndName [r1] "endrullis_2024_ex6_2" ~monic_matching:true
- let endrullis_2024_ex6_2_problem = Termination.pbFromList [r1] 
+ let endrullis_2024_ex6_2_problem =  pbFromList [r1] 
 (*********************
   Endrullis_2023_ex_6.3
 *****************************)
@@ -64,7 +71,7 @@ let rhe = []
 
 let endrullis_2023_ex6_3_rule1 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
 let endrullis_2024_ex6_3 = fromRulesListAndName [endrullis_2023_ex6_3_rule1] "endrullis_2024_ex6_3" ~monic_matching:true
-let endrullis_2023_ex6_3 =Termination.pbFromList [endrullis_2023_ex6_3_rule1]
+let endrullis_2023_ex6_3 = pbFromList [endrullis_2023_ex6_3_rule1]
 
   
  (*********************
@@ -86,7 +93,7 @@ let rhv = [(1,1);(2,2)]
 let rhe = []
 
 let endrullis_2023_ex6_4_rule1 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
-let endrullis_2023_ex6_4 =Termination.pbFromList [endrullis_2023_ex6_4_rule1] 
+let endrullis_2023_ex6_4 = pbFromList [endrullis_2023_ex6_4_rule1] 
 (* let endrullis_2024_ex6_4 = fromRulesListAndName [endrullis_2023_ex6_4_rule1] "endrullis_2024_ex6_4_not_supported" ~monic_matching:true *)
   *)
 
@@ -105,7 +112,7 @@ let endrullis_2024_exd3_r1r =
   [(1,1)] []
 let endrullis_2024_exd3_r1 = Grs.fromHomos endrullis_2024_exd3_r1l endrullis_2024_exd3_r1r
 
-let endrullis_2024_exd3_problem =Termination.pbFromList [endrullis_2024_exd3_r1] 
+let endrullis_2024_exd3_problem = pbFromList [endrullis_2024_exd3_r1] 
 let endrullis_2024_exd3 = fromRulesListAndName [endrullis_2024_exd3_r1] "endrullis_2024_exd3" ~monic_matching:false
 
 
@@ -252,7 +259,7 @@ let r2r =
 let r2 = Grs.fromHomos r2l r2r
 
 let plump20183r2 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
-(* let plump20183 =Termination.pbFromList [r1; r2] *)
+(* let plump20183 = pbFromList [r1; r2] *)
 let plump_1995_ex3_8 =  fromRulesListAndName [
   r1;
   r2
@@ -308,7 +315,7 @@ let plump_1995_ex4_1 =  fromRulesListAndName [
   ] "plump_1995_ex4_1"
   ~monic_matching:true
 
-let plump_1995_ex4_1_problem = Termination.pbFromList [
+let plump_1995_ex4_1_problem =  pbFromList [
   r1;
   r2
   ]
@@ -426,7 +433,7 @@ let rp9 =
   [(1,1);(2,2)] []
 let r9 = Grs.fromHomos lp9 rp9
 
-let plump_2018_fig10_problem =Termination.pbFromList [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] 
+let plump_2018_fig10_problem = pbFromList [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] 
 let plump_2018_fig10 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump_2018_fig10"
 let plump_2018_ex5 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump_2018_ex5"
 (*********************
@@ -485,7 +492,7 @@ let r1 = Grs.fromHomos lp1 rp1
 let r2 = Grs.fromHomos lp2 rp2
 let r3 = Grs.fromHomos lp3 rp3
 let r4 = Grs.fromHomos lp4 rp4
-let bruggink_2015_ex4_problem = Termination.pbFromList [r1;r2;r3;r4]
+let bruggink_2015_ex4_problem =  pbFromList [r1;r2;r3;r4]
 let bruggink_2015_ex4 = fromRulesListAndName [r1;r2;r3;r4]"bruggink_2015_ex4"
 let bruggink_2015_ex4_rules_2_3_4 =  fromRulesListAndName  [r2;r3;r4] "bruggink_2015_ex4_r234"
 let bruggink_2015_ex4_r34 =  fromRulesListAndName  [r3;r4]  "bruggink_2015_ex4_r34"
@@ -547,7 +554,7 @@ let r1 = Grs.fromHomos lp1 rp1
 let r2 = Grs.fromHomos lp2 rp2
 let r3 = Grs.fromHomos lp3 rp3
 let r4 = Grs.fromHomos lp4 rp4
-let bruggink_2015_ex5_problem = Termination.pbFromList [r1;r2;r3;r4]  
+let bruggink_2015_ex5_problem =  pbFromList [r1;r2;r3;r4]  
 let bruggink_2015_ex5 =  fromRulesListAndName  [r1;r2;r3;r4]  "bruggink_2015_ex5"
 let bruggink_2015_ex5_rules_3_4 =  fromRulesListAndName  [r3;r4] "bruggink_2015_ex5_r34"
 
@@ -643,7 +650,7 @@ let r3 = Grs.fromHomos lp3 rp3
 let r4 = Grs.fromHomos lp4 rp4
 let r5 = Grs.fromHomos lp5 rp5
 let r6 = Grs.fromHomos lp6 rp6
-let bruggink_2015_ex6_problem = Termination.pbFromList [r1;r2;r3;r4;r5;r6] 
+let bruggink_2015_ex6_problem =  pbFromList [r1;r2;r3;r4;r5;r6] 
 let bruggink_2015_ex6 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "bruggink_2015_ex6"
 let endrullis_2024_exd2 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "endrullis_2024_exd2"
 let bruggink_2015_ex6_rules_2_3_4_5_6 =  fromRulesListAndName  [r2;r3;r4;r5;r6] "bruggink_2015_ex6_r23456"
@@ -694,7 +701,7 @@ let bruggink_2014_ex_4 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
 let bruggink_2014_ex_4_rl_1 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
 let bruggink_2014_ex6 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2014_ex_4_and_6"
 let bruggink_2015_ex2 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2015_ex2"
-let bruggink_2014_ex4_problem = Termination.pbFromList [bruggink_2014_ex_4]
+let bruggink_2014_ex4_problem =  pbFromList [bruggink_2014_ex_4]
 (*********************
   bruggink_2014_ex_5
 *****************************)
@@ -767,7 +774,7 @@ let bruggink_2014_ex_5_rl4 = Grs.fromHomos l4 r4
     bruggink_2014_ex_5_rl3;
     bruggink_2014_ex_5_rl4
     ] *)
-let bruggink_2014_ex5_problem = Termination.pbFromList [  bruggink_2014_ex_5_rl1;
+let bruggink_2014_ex5_problem =  pbFromList [  bruggink_2014_ex_5_rl1;
 bruggink_2014_ex_5_rl2;
 bruggink_2014_ex_5_rl3;
 bruggink_2014_ex_5_rl4
@@ -842,7 +849,7 @@ let cir = Homo.fromList
 let sm = Grs.fromHomos sml smr
 let ar = Grs.fromHomos arl arr
 let ci = Grs.fromHomos cil cir
-let bruggink_2014_ad_hoc_routing_protocol_problem = Termination.pbFromList  [sm;ar;ci]
+let bruggink_2014_ad_hoc_routing_protocol_problem =  pbFromList  [sm;ar;ci]
 let bruggink_2014_ad_hoc_routing_protocol = fromRulesListAndName [sm;ar;ci] "bruggink_2014_ad_hoc_routing_protocol"
 let bruggink_2014_ad_hoc_routing_protocol_rules_sm_ar_only = fromRulesListAndName [sm;ar] "bruggink_2014_ad_hoc_routing_protocol_rules_ar_ci_only"
 
@@ -865,7 +872,7 @@ let rhv = [(1,1);(2,2);(3,3)]
 let rhe = []
 
 let bonfante_2023_main_ex_follow = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
-let bonfante_2023_main_ex =Termination.pbFromList [bonfante_2023_main_ex_follow]  
+let bonfante_2023_main_ex = pbFromList [bonfante_2023_main_ex_follow]  
 
 (* endrullis ex 6.9 *)
 let r1_r = Homo.fromList 
@@ -881,7 +888,7 @@ let r1_l = Homo.fromList
   [(1,1); (2,2)]
 
 let plump_2018_ex6_r1 = Grs.fromHomos r1_l r1_r
-let plump_2018_ex6_problem = Termination.pbFromList [plump_2018_ex6_r1]
+let plump_2018_ex6_problem =  pbFromList [plump_2018_ex6_r1]
 let plump_2018_ex6 = fromRulesListAndName [plump_2018_ex6_r1] "plump_2018_ex6"
 
 (* endrullis ex 6.9 variant *)
@@ -898,7 +905,7 @@ let r1_r = Homo.fromList
   [] 
 
 let plump_2018_ex6_variant_r1 = Grs.fromHomos r1_l r1_r
-(* let plump_2018_ex6_variant_problem = Termination.pbFromList [plump_2018_ex6_variant_r1] *)
+(* let plump_2018_ex6_variant_problem =  pbFromList [plump_2018_ex6_variant_r1] *)
 let plump_2018_ex6_variant = fromRulesListAndName [plump_2018_ex6_variant_r1] "plump_2018_ex6_discret_interface"
 let plump_2018_ex6_variant_monic = fromRulesListAndName ~monic_matching:true [plump_2018_ex6_variant_r1] "plump_2018_ex6_variant_monic"
 

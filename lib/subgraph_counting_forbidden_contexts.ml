@@ -3,25 +3,26 @@ module Grs = GraphRewritingSystem
 module RuleSet = GraphRewritingSystem.RuleSet
 module Rule = GraphRewritingSystem.DPOrule
 open Ruler_graph
+module MGraph = MGraph_ext
 let (<|) f x = f x 
 
 (*****************************************
           DRX
-*****************************************)
+*****************************************) 
 let subgraph_of_rk  (rl:Rule.t) rp =
   let im_r_k = rl.r |> Homo.imgOf in
-  MGraph.isSubGraphOf rp im_r_k
+  MGraph_ext.isSubGraphOf rp im_r_k
 
 let%expect_test "" = 
-  (* let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in *)
+  (* let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in *)
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
-  let subgraphs = rho |> Rule.rightGraph |> MGraph.subGraphs in
+  let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
   let elim = List.filter (subgraph_of_rk rho) subgraphs in
   Printf.sprintf "elim nb subgraphs : %d " (elim |> List.length) |> print_endline;
-  List.iter (fun g -> MGraph.toStr g |> print_endline) elim;
+  List.iter (fun g -> MGraph_ext.toStr g |> print_endline) elim;
   ;
-  [%expect{|
+  [%expect{| 
     total nb subgraphs : 34
     elim nb subgraphs : 4
     nodes : [  ]
@@ -36,22 +37,22 @@ let%expect_test "" =
  
 
 let iso_to_x x rp =
-  Termination.MGraph.iso rp x
+  MGraph_ext.iso rp x
 let%expect_test "" = 
-  let (x:Ruler_graph.rulerGraph) = { x = MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let (x:Ruler_graph.rulerGraph) = { x = MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
-  let subgraphs = rho |> Rule.rightGraph |> MGraph.subGraphs in
+  let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
   let elim = List.filter (subgraph_of_rk rho) subgraphs in
   Printf.sprintf "nb subgraphs (subgraph of r(K)): %d " (elim |> List.length) |> print_endline;
-  let subgraphs = MGraph.GraphSet.diff (subgraphs |>  MGraph.GraphSet.of_list) (elim |> MGraph.GraphSet.of_list) in
-   Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph.GraphSet.cardinal) |> print_endline;
-  let elim = MGraph.GraphSet.filter (iso_to_x x.x) subgraphs in
-  Printf.sprintf "nb subgraphs that are iso to x: %d " (elim |> MGraph.GraphSet.cardinal) |> print_endline;
-  MGraph.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph.toStr g) |> print_string) elim
+  let subgraphs = MGraph_ext.GraphSet.diff (subgraphs |>  MGraph_ext.GraphSet.of_list) (elim |> MGraph_ext.GraphSet.of_list) in
+   Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph_ext.GraphSet.cardinal) |> print_endline;
+  let elim = MGraph_ext.GraphSet.filter (iso_to_x x.x) subgraphs in
+  Printf.sprintf "nb subgraphs that are iso to x: %d " (elim |> MGraph_ext.GraphSet.cardinal) |> print_endline;
+  MGraph_ext.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string) elim
   ;
-  let subgraphs = MGraph.GraphSet.diff (subgraphs) (elim) in
-  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph.GraphSet.cardinal) |> print_endline;
+  let subgraphs = MGraph_ext.GraphSet.diff (subgraphs) (elim) in
+  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph_ext.GraphSet.cardinal) |> print_endline;
   [%expect{|
     total nb subgraphs : 34
     nb subgraphs (subgraph of r(K)): 4
@@ -60,17 +61,17 @@ let%expect_test "" =
     nb subgraphs remained: 30
   |}]
 
-let can_construct_pbpo_diagram (x:MGraph.t) h_K'R' r' =
+let can_construct_pbpo_diagram (x:MGraph_ext.t) h_K'R' r' =
   (* let h_R'R = Homo.inclusion_morph r' (rl |> Rule.rightGraph) in
   let pb,k' = Category_Graph.pullback_cospan_monos ({left=rl.r; right=h_R'R}:Category_Graph.cospan) in *)
   let h_R'Xs = Homo.homSet r' x |> List.filter Homo.isInj in
   (* let h_K'R' = Homo.inclusion_morph k' r' in *)
     (* List.map (fun h_R'X -> 
-    MGraph.existPushoutComplementOfInjHomos  *)
+    MGraph_ext.existPushoutComplementOfInjHomos  *)
     (* if Homo.isComposible (Homo.inclusion_morph k' r') h_R'X |> not then 
       begin
         Printf.sprintf "\nk':\n%s\nr':\n%s\nh_r'x:%s\n" 
-          (MGraph.toStr k') (MGraph.toStr r') (Homo.toStr h_R'X) |> print_string
+          (MGraph_ext.toStr k') (MGraph_ext.toStr r') (Homo.toStr h_R'X) |> print_string
       end else *)
     (* Homo.composition (Homo.inclusion_morph k' r') h_R'X *)
     (* () *)
@@ -81,30 +82,30 @@ let can_construct_pbpo_diagram (x:MGraph.t) h_K'R' r' =
   (List.is_empty tmp |> not)
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
-  let subgraphs = rho |> Rule.rightGraph |> MGraph.subGraphs in
+  let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
   let elim = List.filter (subgraph_of_rk rho) subgraphs in
   Printf.sprintf "nb subgraphs (subgraph of r(K)): %d " (elim |> List.length) |> print_endline;
-  let subgraphs = MGraph.GraphSet.diff (subgraphs |>  MGraph.GraphSet.of_list) (elim |> MGraph.GraphSet.of_list) in
-   Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph.GraphSet.cardinal) |> print_endline;
-  let elim = MGraph.GraphSet.filter (iso_to_x x.x) subgraphs in
-  Printf.sprintf "nb subgraphs that are iso to x: %d " (elim |> MGraph.GraphSet.cardinal) |> print_endline;
-  MGraph.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph.toStr g) |> print_string) elim
+  let subgraphs = MGraph_ext.GraphSet.diff (subgraphs |>  MGraph_ext.GraphSet.of_list) (elim |> MGraph_ext.GraphSet.of_list) in
+   Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph_ext.GraphSet.cardinal) |> print_endline;
+  let elim = MGraph_ext.GraphSet.filter (iso_to_x x.x) subgraphs in
+  Printf.sprintf "nb subgraphs that are iso to x: %d " (elim |> MGraph_ext.GraphSet.cardinal) |> print_endline;
+  MGraph_ext.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string) elim
   ;
-  let subgraphs = MGraph.GraphSet.diff (subgraphs) (elim) in
-  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph.GraphSet.cardinal) |> print_endline;
+  let subgraphs = MGraph_ext.GraphSet.diff (subgraphs) (elim) in
+  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph_ext.GraphSet.cardinal) |> print_endline;
   let right_graph = rho |> Rule.rightGraph in
   let subgraphs = 
-    MGraph.GraphSet.filter 
+    MGraph_ext.GraphSet.filter 
       (fun rp ->
         let (h_k'r', _) = Category_Graph.pullback_cospan_monos (Homo.inclusion_morph rp right_graph, rho.r ) in
         can_construct_pbpo_diagram x.x h_k'r' rp
         ) 
       subgraphs in
-  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph.GraphSet.cardinal) |> print_endline;
-  MGraph.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph.toStr g) |> print_string) subgraphs
+  Printf.sprintf "nb subgraphs remained: %d " (subgraphs |> MGraph_ext.GraphSet.cardinal) |> print_endline;
+  MGraph_ext.GraphSet.iter (fun g -> Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string) subgraphs
   ;
   [%expect{|
     total nb subgraphs : 34
@@ -126,18 +127,18 @@ let%expect_test "" =
     nodes : [ 2;5 ]
     arrows : [ (5,a,2,3) ]
   |}]
-let calculateDXR (x:MGraph.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomomorphism.t) list = 
+let calculateDXR (x:MGraph_ext.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomomorphism.t) list = 
   (* assertion : rl injective rule  *)
   assert (Homo.isInj rl.l && Homo.isInj rl.r);
   let rhsGraph = Rule.rightGraph rl in
   (* body *)
   let r's =  
-    MGraph.propreSubgraphs rhsGraph 
+    MGraph_ext.propreSubgraphs rhsGraph 
     (* r' is not a subgraph of r(K) *)
     |> List.filter (fun rp -> subgraph_of_rk rl rp |> not)
        (* (fun r' -> 
           let im_r_k = rl.r |> Homo.imgOf in
-          not (MGraph.isSubGraphOf r' im_r_k)) *)
+          not (MGraph_ext.isSubGraphOf r' im_r_k)) *)
     (* r' is not isomorphic to X *)
     |> List.filter
       (fun rp -> not <| iso_to_x x rp) in
@@ -160,11 +161,11 @@ let calculateDXR (x:MGraph.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomomorp
 
  
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   calculateDXR x.x rho 
   |>
-  List.iter (fun (h_k'r', _) -> let g = Homo.codom h_k'r' in Printf.sprintf "\n%s\n" (MGraph.toStr g) |> print_string);
+  List.iter (fun (h_k'r', _) -> let g = Homo.codom h_k'r' in Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string);
   [%expect{|
     nodes : [ 2;5 ]
     arrows : [ (5,a,2,3) ]
@@ -177,6 +178,24 @@ let%expect_test "" =
 
     nodes : [ 1;2;4 ]
     arrows : [ (1,a,4,1) ]
+  |}]
+
+
+let%expect_test "" = 
+  let x = { x=MGraph_ext.fromList [1;3 ] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
+  calculateDXR x.x rho 
+  |>
+  List.iter (fun (h_k'r', _) -> let g = Homo.codom h_k'r' in Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string);
+  [%expect{|
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,3) ]
+
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,2) ]
+
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,1) ]
   |}]
 
 
@@ -195,7 +214,7 @@ let double_pullback_diagram_holds rho (phi:Homo.t Homo.GraphHomoMap.t) (h_k'r', 
     in
     Homo.isCommutative [h_k'r'; h_r'l] [h_k'k; rho |> Rule.lhs]
     (* let r = (rho |> Rule.rightGraph) in *)
-    (* assert (MGraph.isSubGraphOf r' r);
+    (* assert (MGraph_ext.isSubGraphOf r' r);
     let cospan1 =
       let h_r'r = Homo.inclusion_morph r' r in
       Category_Graph.mk_cospan_with_monos h_r'r rho.r in
@@ -203,15 +222,15 @@ let double_pullback_diagram_holds rho (phi:Homo.t Homo.GraphHomoMap.t) (h_k'r', 
       Category_Graph.mk_cospan_with_monos h_r'l rho.l in
     let _, pb_obj1 = Category_Graph.pullback_cospan_monos cospan1 in
     let _, pb_obj2 = Category_Graph.pullback_cospan_monos cospan2 in
-    MGraph.equal pb_obj1 pb_obj2 *)
+    MGraph_ext.equal pb_obj1 pb_obj2 *)
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x.x rho in
   let (h_k'r', h_k'k) = List.nth drx 0 in
   (* let r' = Homo.codom h_k'r' in *)
-  Printf.sprintf "r'\n%s" (Homo.codom h_k'r'|>MGraph.toStr) |> print_endline ;
+  Printf.sprintf "r'\n%s" (Homo.codom h_k'r'|>MGraph_ext.toStr) |> print_endline ;
   let h_r'l =  Homo.fromList 
                 [ 2;5 ]
                 [ (5,"a",2,3) ]
@@ -243,26 +262,26 @@ let non_clapsing (rho :GraphRewritingSystem.DPOrule.t) drx phi =
     let h_r'l = Homo.GraphHomoMap.find h_k'r' phi in
     let lk = Homo.imgOf rho.l in
     let im_r = Homo.imgOf rho.r in
-    (* assert (MGraph.isSubGraphOf r' (rho.r |> Homo.codom));
-    assert (MGraph.isSubGraphOf im_r (rho.r |> Homo.codom)); *)
+    (* assert (MGraph_ext.isSubGraphOf r' (rho.r |> Homo.codom));
+    assert (MGraph_ext.isSubGraphOf im_r (rho.r |> Homo.codom)); *)
      (* non clapsing on nodes *)
-     let non_clapsing_nodes = (MGraph.NodeSet.for_all
+     let non_clapsing_nodes = (MGraph_ext.NodeSet.for_all
       (fun v ->      
-        if MGraph.isNodeOf im_r v then true
+        if MGraph_ext.isNodeOf im_r v then true
         else begin
-          Homo.app_hv ~h:h_r'l v |> MGraph.isNodeOf lk |> not
+          Homo.app_hv ~h:h_r'l v |> MGraph_ext.isNodeOf lk |> not
         end)
-      (MGraph.nodes r')) in
+      (MGraph_ext.nodes r')) in
       (* (Printf.sprintf "non_clapsing_nodes : %b" non_clapsing_nodes) |> print_endline; *)
       (* non clapsing on arrows *)
       let non_clapsing_edges = 
-        (MGraph.ArrowSet.for_all
+        (MGraph_ext.ArrowSet.for_all
         (fun v ->      
-          if MGraph.isArrowOf im_r v then true
+          if MGraph_ext.isArrowOf im_r v then true
           else begin
-            Homo.app_he ~h:h_r'l v |> MGraph.isArrowOf lk |> not
+            Homo.app_he ~h:h_r'l v |> MGraph_ext.isArrowOf lk |> not
           end)
-        (MGraph.arrows r')) in
+        (MGraph_ext.arrows r')) in
         (* (Printf.sprintf "non_clapsing_edges : %b" non_clapsing_edges) |> print_endline; *)
         non_clapsing_edges && non_clapsing_nodes
   ) 
@@ -278,21 +297,21 @@ let non_clapsing (rho :GraphRewritingSystem.DPOrule.t) drx phi =
       (* let rk = Homo.imgOf rho.r in *)
         (List.for_all2
         (fun x y ->      
-            if MGraph.Arrow.equal x y then true
-            else begin
-              let x', y' = Homo.app_he ~h:h_r'l x, Homo.app_he ~h:h_r''l x in
-              MGraph.Arrow.equal x' y' |> not
-            end
+            MGraph_ext.Arrow.equal x y ||
+            begin
+              let x', y' = Homo.app_he ~h:h_r'l x, Homo.app_he ~h:h_r''l y in
+              MGraph_ext.Arrow.equal x' y' |> not 
+            end 
         )
-        (MGraph.arrows r' |> MGraph.ArrowSet.to_list)
-        (MGraph.arrows r'' |> MGraph.ArrowSet.to_list)
+        (MGraph_ext.arrows r' |> MGraph_ext.ArrowSet.to_list)
+        (MGraph_ext.arrows r'' |> MGraph_ext.ArrowSet.to_list)
         )
     ) 
     drx
     drx
 
-let node_injective_if_isolated_nodes (x:MGraph.t) drx phi =
-  if x |> MGraph.isConnected then true 
+let node_injective_if_isolated_nodes (x:MGraph_ext.t) drx phi =
+  if x |> MGraph_ext.isConnected then true 
   else
   List.for_all2 (fun (h_k'r', _) (h_k'r'2, _) ->
     let r', r'' = Homo.codom h_k'r', Homo.codom h_k'r'2 in
@@ -300,14 +319,14 @@ let node_injective_if_isolated_nodes (x:MGraph.t) drx phi =
     let h_r''l = Homo.GraphHomoMap.find h_k'r'2 phi in
       (List.for_all2
       (fun x y ->      
-          if MGraph.Node.equal x y then true
+          if MGraph_ext.Node.equal x y then true
           else begin
             let x', y' = Homo.app_hv ~h:h_r'l x, Homo.app_hv ~h:h_r''l x in
-            MGraph.Node.equal x' y' |> not
+            MGraph_ext.Node.equal x' y' |> not
           end
       )
-      (MGraph.nodes r' |> MGraph.NodeSet.to_list)
-      (MGraph.nodes r'' |> MGraph.NodeSet.to_list)
+      (MGraph_ext.nodes r' |> MGraph_ext.NodeSet.to_list)
+      (MGraph_ext.nodes r'' |> MGraph_ext.NodeSet.to_list)
       )
   ) 
   drx
@@ -316,7 +335,7 @@ let node_injective_if_isolated_nodes (x:MGraph.t) drx phi =
 
 
 
-let generate_all_phiX (x:MGraph.t) rho : (Homo.t Homo.GraphHomoMap.t) list = 
+let generate_all_phiX (x:MGraph_ext.t) rho : (Homo.t Homo.GraphHomoMap.t) list = 
   let open Base in
   let cartesian_product lists =
     Core.List.fold lists ~init:[[]] 
@@ -358,14 +377,14 @@ let generate_all_phiX (x:MGraph.t) rho : (Homo.t Homo.GraphHomoMap.t) list =
    ) combinations 
  
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let phis = generate_all_phiX x.x rho in
   List.iteri (fun i phiX ->
     print_endline <| Printf.sprintf "phi %d: " i;
     List.iteri (fun j (rp,h_rpl) -> 
       Printf.sprintf "phi i%d j%d:\nr':\n%s\nh_r'l:\n%s" i j 
-      ( MGraph.toStr (rp|>Homo.codom)) (Homo.toStr h_rpl) |> print_endline
+      ( MGraph_ext.toStr (rp|>Homo.codom)) (Homo.toStr h_rpl) |> print_endline
     )
     (phiX |> Homo.GraphHomoMap.bindings)
   )
@@ -427,7 +446,7 @@ let%expect_test "" =
   |}]
 
 
-let is_x_non_increasing_rule (x:MGraph.t) rho (phiX :Homo.t Homo.GraphHomoMap.t) =
+let is_x_non_increasing_rule (x:MGraph_ext.t) rho (phiX :Homo.t Homo.GraphHomoMap.t) =
   let drx = calculateDXR x rho in
   (* condition 1 *)
   let cond1 = List.for_all (fun (h_k'r', h_k'k) ->
@@ -451,7 +470,7 @@ let is_x_non_increasing_rule_forSomePhi x rho =
   List.exists (is_x_non_increasing_rule x.x rho) phis
 
 let%expect_test "" = 
-  let x = { x=MGraph.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   (* let drx = calculateDXR x.x rho in *)
   let phis = generate_all_phiX x.x rho in
@@ -459,6 +478,67 @@ let%expect_test "" =
   [%expect{|
     is x non increasing : true
   |}]
+
+
+let%expect_test "" = 
+  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
+  let phis = generate_all_phiX x.x rho in
+  is_x_non_increasing_rule x.x rho (List.nth phis 0) |> Printf.sprintf "is x non increasing : %b\n" |> print_endline; 
+  (* let phis = generate_all_phiX x.x rho in *)
+  (* List.iteri (fun i phiX -> *)
+    (* print_endline <| Printf.sprintf "phi %d: " i; *)
+    List.iteri (fun j (rp,h_rpl) -> 
+      Printf.sprintf "phi i%d j%d:\nr':\n%s\nh_r'l:\n%s" 0 j 
+      ( MGraph_ext.toStr (rp|>Homo.codom)) (Homo.toStr h_rpl) |> print_endline
+    )
+    (phis |> List.hd |> Homo.GraphHomoMap.bindings)
+  (* ) *)
+  (* phis; *)
+  ;[%expect{|
+    is x non increasing : false
+
+    phi i0 j0:
+    r':
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,1) ]
+    h_r'l:
+    dom:
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,1) ]
+    codom:
+    nodes : [ 1;2;3;4 ]
+    arrows : [ (1,f,4,3);(1,f,3,2);(1,f,2,1);(2,a,2,4);(3,b,3,5) ]
+    hv:[(1,1);(4,4)]
+    he:[(1,3)]
+    phi i0 j1:
+    r':
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,2) ]
+    h_r'l:
+    dom:
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,2) ]
+    codom:
+    nodes : [ 1;2;3;4 ]
+    arrows : [ (1,f,4,3);(1,f,3,2);(1,f,2,1);(2,a,2,4);(3,b,3,5) ]
+    hv:[(1,1);(4,4)]
+    he:[(2,3)]
+    phi i0 j2:
+    r':
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,3) ]
+    h_r'l:
+    dom:
+    nodes : [ 1;4 ]
+    arrows : [ (1,f,4,3) ]
+    codom:
+    nodes : [ 1;2;3;4 ]
+    arrows : [ (1,f,4,3);(1,f,3,2);(1,f,2,1);(2,a,2,4);(3,b,3,5) ]
+    hv:[(1,1);(4,4)]
+    he:[(3,3)]
+  |}]
+
 
 
 (****************************************
@@ -477,7 +557,7 @@ let generate_occs_with_forbidden_contexts x g =
     List.exists 
     (fun occ_f -> 
         Homo.isCommutative [x.fx |> Option.get; occ_f] [occ_x]
-      (* MGraph.isSubGraphOf (x |> Homo.imgOf) (f |> Homo.imgOf) *)
+      (* MGraph_ext.isSubGraphOf (x |> Homo.imgOf) (f |> Homo.imgOf) *)
       )
     occs_contexts
   ) occs_x in
@@ -497,19 +577,19 @@ let generate_occs_with_forbidden_contexts x g =
 (* Condition 4 *)
 
 let%expect_test "" = 
-  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+  let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
           fx = Some (Homo.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
           [(1,1);(2,2);(3,3)] [(1,1);(2,2)]) } in
-  let g = MGraph.fromList [1;2;3;4;7;6] 
+  let g = MGraph_ext.fromList [1;2;3;4;7;6] 
     [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2);
         (7,"a",1,4);(2,"a",6,5)
     ]in
   let _,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-  List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  List.iter (fun o -> Printf.sprintf "%s" (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
   Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
-  List.iter (fun o -> Printf.sprintf "%s" (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
+  List.iter (fun o -> Printf.sprintf "%s" (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
   ;[%expect {|
     2 occs not forbiddened
     nodes : [ 2;3;6 ]
@@ -523,7 +603,7 @@ let%expect_test "" =
  
 
 let%expect_test "" = 
-  let x = MGraph.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
+  let x = MGraph_ext.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
   let h_x_f = Homo.fromList 
     [1;2] [(1,"node",1,1);(2,"node",2,2)]
     [1;3] [(1,"node",1,1);(3,"node",3,2);(1,"edge",3,3);]
@@ -532,19 +612,19 @@ let%expect_test "" =
   let g = ConcretGraphRewritingSystems.endrullis_2024_exd3_r1l |> Homo.codom in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
   print_endline "";
 
   let occs_context = (Homo.occs (Homo.codom h_x_f) g) in
   Printf.sprintf "%d occs of the context" (List.length occs_context) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
   print_endline "";
 
   Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
   Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
 
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
   ;[%expect {|
     2 occs
     occ 0 : nodes : [ 1;2 ]
@@ -564,7 +644,7 @@ let%expect_test "" =
 
 
 let%expect_test "" = 
-  let x = MGraph.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
+  let x = MGraph_ext.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
   let h_x_f = Homo.fromList 
     [1;2] [(1,"node",1,1);(2,"node",2,2)]
     [1;3] [(1,"node",1,1);(3,"node",3,2);(1,"edge",3,3);]
@@ -573,19 +653,19 @@ let%expect_test "" =
   let g = ConcretGraphRewritingSystems.endrullis_2024_exd3_r1r |> Homo.codom in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
   print_endline "";
 
   let occs_context = (Homo.occs (Homo.codom h_x_f) g) in
   Printf.sprintf "%d occs of the context" (List.length occs_context) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
   print_endline "";
 
   Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
   Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
 
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
   ;[%expect {|
     2 occs
     occ 0 : nodes : [ 1;3 ]
@@ -637,7 +717,7 @@ let predictable_cond1 x (rho : Rule.t) (mx:Homo.t Homo.GraphHomoMap.t) =
       let (_, h_k'_k_right) = Category_Graph.pullback_cospan_monos (h_x_r, rhs) in
       let img1 = h_k'_k_left |> Homo.imgOf in
       let img2 = h_k'_k_right |> Homo.imgOf in
-      MGraph.equal img1 img2
+      MGraph_ext.equal img1 img2
   )
   mono_x_l_forbidden
    
@@ -655,7 +735,7 @@ let generate_mxs x (rho:Rule.t) =
 
 let%expect_test "" = 
   let rho =  ConcretGraphRewritingSystems.bruggink_2014_ex1_rl in
-  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+  let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
           fx = Some (Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
@@ -669,7 +749,7 @@ let%expect_test "" =
   |}];; 
 
 
-let%expect_test "" = 
+let%expect_test "" =  
   let l1 = Homo.fromList
     [1;2] [] 
     [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
@@ -679,7 +759,7 @@ let%expect_test "" =
     [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
     [(1,1);(2,2)] [] in 
   let rho = Grs.fromHomos l1 r1 in
-  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+  let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
           fx = Some (Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
@@ -769,7 +849,7 @@ let predictable_cond2 (x:rulerGraph) (rho : Rule.t) mx (mf:Homo.t Homo.GraphHomo
         let (_, h_k'_k_right) = Category_Graph.pullback_cospan_monos (h_f_r, rhs) in
         let img1 = h_k'_k_left |> Homo.imgOf in
         let img2 = h_k'_k_right |> Homo.imgOf in
-        MGraph.equal img1 img2) &&
+        MGraph_ext.equal img1 img2) &&
       (* condition 2.2 *)
       (
         let occs_x_l_forbiddened =  
@@ -864,7 +944,7 @@ let%expect_test "" =
   let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mfs in 
    String.concat "next mf\n" tmp
    |> print_endline;
-  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+  let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
    fx = Some h_x_f } in
   let mxs = generate_mxs x rho in
   let mx = List.hd mxs in
@@ -1017,7 +1097,7 @@ let%expect_test "" =
     [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
     [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
     [(1,1);(2,2);(3,3)] [(1,1);(2,2)]  in
-  let x = {x = MGraph.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
+  let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
     fx = Some h_x_f } in
   let predictable = isPredictable x rho in
   (* print_endline "main func test"; *)
@@ -1041,8 +1121,8 @@ let%expect_test "" =
   
 let occs_graph_with_forbidden_context_strictly_decreasing x rho =
   let l, r = rho |> Rule.leftGraph, rho |> Rule.rightGraph in
-  (* Printf.sprintf "left graph: %s \n" ( l |> MGraph.toStr) |> print_endline;
-  Printf.sprintf "right graph: %s \n" ( r |> MGraph.toStr) |> print_endline; *)
+  (* Printf.sprintf "left graph: %s \n" ( l |> MGraph_ext.toStr) |> print_endline;
+  Printf.sprintf "right graph: %s \n" ( r |> MGraph_ext.toStr) |> print_endline; *)
   let occs_x_l_not_forbidden = 
     match generate_occs_with_forbidden_contexts x l with _,_,occs_not_forbidden -> occs_not_forbidden in
   (* begin 
@@ -1050,26 +1130,26 @@ let occs_graph_with_forbidden_context_strictly_decreasing x rho =
 
     let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x l in
     Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
     print_endline "";
 
     Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
     Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
   end;
   begin 
     Printf.sprintf "ldfjls;djfds;lfjds;lf ==9((( s \n right %d \n" (List.length occs_x_l_not_forbidden) |> print_endline;
 
     let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x r in
     Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
     print_endline "";
 
     Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
     Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
-    List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
+    List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
   end; *)
   let occs_x_r_not_forbidden = 
     match generate_occs_with_forbidden_contexts x r with _,_,occs_not_forbidden -> occs_not_forbidden in
@@ -1078,7 +1158,7 @@ let occs_graph_with_forbidden_context_strictly_decreasing x rho =
 
 
 let%expect_test "" = 
-  (* let x = MGraph.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
+  (* let x = MGraph_ext.fromList [1;2] [(1,"node",1,1);(2,"node",2,2)] in
   let h_x_f = Homo.fromList 
     [1;2] [(1,"node",1,1);(2,"node",2,2)]
     [1;3] [(1,"node",1,1);(3,"node",3,2);(1,"edge",3,3);]
@@ -1089,36 +1169,36 @@ let%expect_test "" =
   let g = l in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
   print_endline "";
 
   let occs_context = (Homo.occs (Homo.codom (x.fx|>Option.get)) g) in
   Printf.sprintf "%d occs of the context" (List.length occs_context) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
   print_endline "";
 
   Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
   Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
 
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened;
   print_endline "\nRight\n";
   let g = r in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs;
   print_endline "";
 
   let occs_context = (Homo.occs (Homo.codom (x.fx|>Option.get)) g) in
   Printf.sprintf "%d occs of the context" (List.length occs_context) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_context;
   print_endline "";
 
   Printf.sprintf "%d occs not forbiddened" (List.length occs_x_not_forbiddened) |> print_endline;
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s" i (MGraph_ext.toStr (o |> Homo.imgOf)) |> print_endline) occs_x_not_forbiddened;
   Printf.sprintf "%d occs forbiddened" (List.length occs_x_forbiddened) |> print_endline;
 
-  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
+  List.iteri (fun i o -> Printf.sprintf "occ %d : %s\n" i (MGraph_ext.toStr (o|> Homo.imgOf)) |> print_endline) occs_x_forbiddened
   ;[%expect {|
   2 occs
   occ 0 : nodes : [ 1;2 ]
