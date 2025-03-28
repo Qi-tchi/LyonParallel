@@ -7,7 +7,6 @@
 *.synctex.gz
 *.toc
 _build/
-tmp/
 *.out
 *.o
 *.dot*

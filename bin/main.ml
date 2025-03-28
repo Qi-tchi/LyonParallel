@@ -1,4 +1,4 @@
-open Icgt25
+open LyonParallel
 (* File-: simple_repl.ml *)
 let time = ref 0.
 let (log:(GraphRewritingSystem.t list
@@ -389,7 +389,7 @@ let () =
 (****  subgraph counting 2024 02 09  *****)
 [@@@warning "-33"]
 
-open Icgt25.ConcretGraphRewritingSystems
-open Icgt25.Termination
+open LyonParallel.ConcretGraphRewritingSystems
+open LyonParallel.Termination
 [@@@warning "-33"]
 (*********)

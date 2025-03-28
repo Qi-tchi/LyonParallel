@@ -1,4 +1,4 @@
 (executable
- (public_name Icgt25)
+ (public_name LyonParallel)
  (name main)
- (libraries Icgt25))
+ (libraries LyonParallel))
