@@ -5,15 +5,15 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github Qi-tchi/LyonParallel))
 
-(authors "Author Name <author@example.com>")
+(authors "")
 
 (maintainers "Maintainer Name <maintainer@example.com>")
 
 (license LICENSE)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/Qi-tchi/LyonParallel/wiki)
 
 (package
  (name LyonParallel)
@@ -26,6 +26,6 @@ Implemented in OCaml under the MIT license, it integrates four methods:
 (4) An extension of the subgraph-counting criterion accounting antipatterns (QIU, HAL report hal-04973012).  ")
  (depends ocaml)
  (tags
-  ("add topics" "to describe" your project)))
+  ("Graph Rewriting" "Termination" "Interpretation Method" "Subgraph Counting" "Automated Reasoning")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
