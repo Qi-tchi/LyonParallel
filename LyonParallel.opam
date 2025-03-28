@@ -8,13 +8,13 @@ Implemented in OCaml under the MIT license, it integrates four methods:
 (2) Non-well-founded semiring extensions (QIU, HAL report hal-04954960),  
 (3) A subgraph-counting criterion (QIU, accepted at ICGT 2025),  
 (4) An extension of the subgraph-counting criterion accounting antipatterns (QIU, HAL report hal-04973012).  """
-maintainer: ["Maintainer Name <maintainer@example.com>"]
-authors: ["Author Name <author@example.com>"]
+maintainer: ["QIU Qi (Emile)"]
+authors: ["QIU Qi (Emile)"]
 license: "LICENSE"
-tags: ["add topics" "to describe" "your" "project"]
-homepage: "https://github.com/username/reponame"
-doc: "https://url/to/documentation"
-bug-reports: "https://github.com/username/reponame/issues"
+tags: ["Graph Rewriting" "Termination" "Interpretation Method" "Subgraph Counting" "Automated Reasoning"]
+homepage: "https://github.com/Qi-tchi/LyonParallel/"
+doc: "todo"
+bug-reports: "https://github.com/Qi-tchi/LyonParallel/issues"
 depends: [
   "dune" {>= "3.16"}
   "ocaml"
