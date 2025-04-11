@@ -236,7 +236,7 @@ type optimizedTypegraph_t = bool
 type strategy_t = 
 | Strat :  Semiring.semiring_t * size_t * integerOrNot * maxWeight_t * optimizedTypegraph_t -> strategy_t
 type meta_stragety_t =
-| User
+| User of strategy_t
 | Auto_total : meta_stragety_t
 | Auto_total_int : meta_stragety_t
 | Auto_total_real : meta_stragety_t
@@ -251,7 +251,7 @@ type meta_stragety_t =
 
 let meta_stragety_to_str m =
   match m with
-  |User -> "to do "
+  |User _ -> "to do "
   |Auto_total -> "auto_total"
   |Auto_total_int -> "auto_total_int"
   |Auto_total_real -> "auto_total_real"
@@ -352,39 +352,40 @@ let gen_z3_interpretation grs (strategy : strategy_t) =
                 Atomic.set solution !res *)
 
 let interp_meta_strategies metas =
-  List.map (fun meta ->
-  match meta with
-  | Auto_int _ | Auto_real _ -> [interp_strategy_autoint_autoreal meta]
-  | Auto_total_int ->
-    List.map interp_strategy_autoint_autoreal [
-      Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default);
-      Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default);
-      Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)
-      ]
-  | Auto_total_real -> 
-    List.map interp_strategy_autoint_autoreal [
-    Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default);
-    Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default);
-    Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default);
-    ]   
-  | Auto_total -> 
-    List.map interp_strategy_autoint_autoreal [
-    Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default);
-    Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default);
-    Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default);
-    Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default);
-    Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default);
-    Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)
-    ]
-  | Auto_total_int_tropical -> List.map interp_strategy_autoint_autoreal [Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default)]
-  | Auto_total_int_arctic -> List.map interp_strategy_autoint_autoreal [Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default)]
-  | Auto_total_int_arithmetic -> List.map interp_strategy_autoint_autoreal [ Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)]
-  | Auto_total_real_tropical ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default)]
-  | Auto_total_real_arctic ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default)]
-  | Auto_total_real_arithmetic ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default)]
-  | _ -> assert false
-  ) metas
-  |> List.flatten
+  let temp = List.map 
+  (fun meta ->
+      match meta with
+      | Auto_int _ | Auto_real _ -> [interp_strategy_autoint_autoreal meta]
+      | Auto_total_int ->
+        List.map interp_strategy_autoint_autoreal [
+          Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default);
+          Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default);
+          Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)
+          ]
+      | Auto_total_real -> 
+        List.map interp_strategy_autoint_autoreal [
+        Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default);
+        Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default);
+        Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default);
+        ]   
+      | Auto_total -> 
+        List.map interp_strategy_autoint_autoreal [
+        Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default);
+        Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default);
+        Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default);
+        Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default);
+        Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default);
+        Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)
+        ]
+      | Auto_total_int_tropical -> List.map interp_strategy_autoint_autoreal [Auto_int(Semiring.Tropical,maxSizeTropicalInt_default,maxWeightTropicalInt_default,opt_default)]
+      | Auto_total_int_arctic -> List.map interp_strategy_autoint_autoreal [Auto_int(Semiring.Arctic,maxSizeArcticInt_default,maxWeightArcticInt_default,opt_default)]
+      | Auto_total_int_arithmetic -> List.map interp_strategy_autoint_autoreal [ Auto_int(Semiring.Arithmetic,maxSizeArithmeticInt_default,maxWeightArithmeticInt_default,opt_default)]
+      | Auto_total_real_tropical ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Tropical,maxSizeTropicalReal_default,opt_default)]
+      | Auto_total_real_arctic ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Arctic,maxSizeArcticReal_default,opt_default)]
+      | Auto_total_real_arithmetic ->  List.map interp_strategy_autoint_autoreal [Auto_real(Semiring.Arithmetic,maxSizeArithmeticReal_default,opt_default)]
+      | User s -> [[s]]   
+  ) metas in
+  temp |> List.flatten
 
 
 
