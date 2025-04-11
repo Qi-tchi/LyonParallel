@@ -160,6 +160,20 @@ let calculateDXR (x:MGraph_ext.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomo
     r's 
 
  
+let%expect_test "icgt25_example_32" = 
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let rho = ConcretGraphRewritingSystems.qiu_2025_ex32 in
+  calculateDXR x.x rho  
+  |>
+  List.iter (fun (h_k'r', _) -> let g = Homo.codom h_k'r' in Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string);
+  [%expect{|
+    nodes : [ 2;3 ]
+    arrows : [ (2,a,3,2) ]
+
+    nodes : [ 1;2;3 ]
+    arrows : [ (2,a,3,2) ]
+  |}]
+
 let%expect_test "" = 
   let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in

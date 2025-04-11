@@ -97,11 +97,11 @@ let cmd_run () =
         let start_time = Unix.gettimeofday () in
         ran := true;
         begin
-        match Parallel.parallel_solving_with_meta_strategy ~grs:(ref grs) ~metas 
-        ~timeout:t ~reset_sol_file:!reset_sol_file with
-        | grs, log_local ->
-          system_current := Some grs;
-          log := !log @ log_local 
+          match Parallel.parallel_solving_with_meta_strategy ~grs:(ref grs) ~metas 
+          ~timeout:t ~reset_sol_file:!reset_sol_file with
+          | grs, log_local ->
+            system_current := Some grs;
+            log := !log @ log_local 
         end;
         reset_sol_file := false;
         time := !time +. (Unix.gettimeofday () -. start_time);
@@ -119,6 +119,7 @@ let cmd_add_strategy s =
   approach := s :: !approach; 
   Printf.printf "Approach %s selected.\n" (s |> Parallel.meta_stragety_to_str); 
   Printf.printf "timeout is set to %f seconds.\n" (Option.get !timeout)
+
 let cmd_select_system n =
   system := Some (List.nth systems n);
   system_current := Some (List.nth systems n);
@@ -168,6 +169,26 @@ let cmd_try_typegraph_processing system auto_defaut_strategies timeout =
     let timeout = float_of_string timeout in
     `try_typegraph (system,strategies,timeout) (* auto_defaut_strategies is a word from {a,n,t,A,N,T}*, ex: ant,ANt,Ta *)
   with _ -> failwith __LOC__
+
+let cmd_try_typegraph_no_auto_processing system nb_smr smrs =
+  try
+    let system = int_of_string system in
+    let nb_smr = int_of_string nb_smr in
+    let smrs_info = ref [] in
+    for i = 0 to nb_smr - 1 do
+      smrs_info := 
+      (
+        Semiring.of_string (List.nth smrs (i+ nb_smr * 1)),    (* semiring *)
+        int_of_string ( List.nth smrs (i+ nb_smr * 0) ),    (* graph dimension *)
+        bool_of_string ( List.nth smrs (i + nb_smr * 2) )   (* intergerOrNot*)
+        (* int_of_string ( List.nth smrs (i + nb_smr * 3) ),    *)
+        (* bool_of_string ( List.nth smrs (i + nb_smr * 4) )  opt *)
+        ):: !smrs_info
+    done;
+    let timeout = 200.0 in
+    `try_typegraph_no_auto (system,!smrs_info,timeout) 
+  with _ -> failwith __LOC__
+
 let cmd_showme () = 
   match !ran with
   | true -> Sys.command "cat tmp/sol.sol" |> ignore
@@ -179,6 +200,18 @@ let cmd_try_typegraph system auto_defaut_strategies time =
   cmd_timeout time;
   cmd_reset_strategies ();
   List.iter cmd_add_strategy auto_defaut_strategies;
+  cmd_run ();
+  cmd_showme ();
+;;
+
+let cmd_try_typegraph_no_auto system smrs_info timeout =
+  cmd_select_system system;
+  cmd_timeout timeout;
+  cmd_reset_strategies ();
+  List.iter (fun (s,n,integerOrNot) -> cmd_add_strategy (Parallel.User 
+    (Parallel.Strat (s,n,integerOrNot,0,false))))
+    (* Semiring.semiring_t * size_t * integerOrNot * maxWeight_t * optimizedTypegraph_t -> strategy_t)  *)
+    smrs_info;
   cmd_run ();
   cmd_showme ();
 ;;
@@ -214,6 +247,8 @@ let handle_command cmd =
   | ["showme"] -> `show_certificat
   | ["run"] -> `run
   | "try_type_graph" :: system :: timeout :: auto_defaut_strategies -> cmd_try_typegraph_processing system auto_defaut_strategies timeout
+  | "try_type_graph_no_auto" :: nb_smr :: system :: smrs ->
+  cmd_try_typegraph_no_auto_processing system nb_smr smrs
   | "try_subgraph_counting_no_forbidden_context" :: system :: []-> `try_subgraph_counting_no_forbidden_context (int_of_string system)
   | "try_subgraph_counting_one_forbidden_context" :: system :: [rg]-> `try_subgraph_counting_one_forbidden_context (int_of_string system, int_of_string rg)
   | ["recap"] -> `recap 
@@ -360,6 +395,8 @@ let rec repl () =
       | `run -> cmd_run ()
       |`try_typegraph (system,auto_defaut_strategies,timeout) -> 
         cmd_try_typegraph system auto_defaut_strategies timeout
+      |`try_typegraph_no_auto (system,smrs_info,timeout) ->
+        cmd_try_typegraph_no_auto system smrs_info timeout 
       | `Print_help_msg msg -> print_endline msg;
       | `Undefined msg -> print_endline msg;
       | `Reset_strategies -> cmd_reset_strategies ()

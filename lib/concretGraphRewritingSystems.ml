@@ -702,6 +702,8 @@ let bruggink_2014_ex_4_rl_1 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_e
 let bruggink_2014_ex6 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2014_ex_4_and_6"
 let bruggink_2015_ex2 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2015_ex2"
 let bruggink_2014_ex4_problem =  pbFromList [bruggink_2014_ex_4]
+
+
 (*********************
   bruggink_2014_ex_5
 *****************************)
@@ -1281,6 +1283,20 @@ let r6r = Homo.fromList
   [(1,1);(2,2)] []
 let r6 = Grs.fromHomos r6l r6r
 let nonwf_n3_modified = fromRulesListAndName [r1;r2;r3;r4;r5;r6] "nonwf_n3_modified"
+
+
+(*********************
+  qiu_2025_ex32
+*****************************)
+let qiu_2025_ex32_l = Homo.fromList
+  [1;2] [(2,"a",1,1)]
+  [1;2] [(2,"a",1,1)]
+  [(1,1);(2,2)] [(1,1)]
+let qiu_2025_ex32_r = Homo.fromList
+  [1;2] [(2,"a",1,1)]
+  [1;2;3] [(2,"a",1,1);(2,"a",3,2)]
+  [(1,1);(2,2)] [(1,1)]
+let qiu_2025_ex32 = Grs.fromHomos qiu_2025_ex32_l qiu_2025_ex32_r
 
 (* 
 

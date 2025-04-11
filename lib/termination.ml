@@ -43,7 +43,7 @@ type problem = ConcretGraphRewritingSystems.problem
 (************************
     calculateRx et ses aux funcs
 ****************************)
-let calculateRx rl x =  
+(* let calculateRx rl x =  
   (* assert(x |> MGraph.isConnected);  *)
   let r = Grs.rhs rl in
   let rightGraph = Grs.rightGraph rl in
@@ -85,7 +85,7 @@ let calculateRx rl x =
   (* Im(r) is subgraph of Rx *)
   let rx_init = Homo.imgOf r in
   (* all Im(h_r'r) calculated is subgraph of Rx *)
-  List.fold_left (fun acc g -> MGraph.unionOfSubGraphs acc g) rx_init square
+  List.fold_left (fun acc g -> MGraph.unionOfSubGraphs acc g) rx_init square *)
 (********************* D(X,R) ******)
 let calculateDXR rl x = 
   assert(x |> MGraph.isConnected); 
@@ -140,7 +140,7 @@ let calculateDXR rl x =
       triples in
   triples |> List.map (fun (_, (hr'r, _)) -> Homo.imgOf hr'r)
 
-let%expect_test "calculateRx" = 
+(* let%expect_test "calculateRx" = 
   let bruggink_2014_example_4_l = Homo.fromList
     [1;2] [] 
     [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
@@ -206,7 +206,7 @@ let%expect_test "calculateRx" =
     with rx :     1 -s:1-> 3 <-s:2-2   3 ->0:3->3
     nodes : [ 1;2;3 ]
     arrows : [ (1,s,3,1);(3,0,3,2) ]
-  |}]
+  |}] *)
 let calculateHomomorphismFromRxToR r rx =  
   assert(MGraph.isSubGraphOf rx r);
   {(Homo.id rx) with codom = r}
@@ -229,7 +229,7 @@ let calculateHomomorphismFromRxToL rx rl hkrx x =
   let hsInjCom = List.filter (fun hrxl -> Homo.isCommutative [hkrx; hrxl] [l]) hsInj in
   hsInjCom
 
-let createsMoreXOnTheLeft x rl =
+(* let createsMoreXOnTheLeft x rl =
   let rx = calculateRx rl x in
   (* todo to do: we do not need to calculate h_rx_to_r, it suffices to take the inclusion function *)
   let h_rx_to_r = calculateHomomorphismFromRxToR rl.r.codom rx in
@@ -237,7 +237,7 @@ let createsMoreXOnTheLeft x rl =
   let h_rx_to_ls =  calculateHomomorphismFromRxToL rx rl h_k_to_rx x in
   match h_rx_to_ls with 
   | [] -> None
-  | h_rx_to_l :: _ -> Some (x, rx, h_k_to_rx, h_rx_to_l, h_rx_to_r)
+  | h_rx_to_l :: _ -> Some (x, rx, h_k_to_rx, h_rx_to_l, h_rx_to_r) *)
 (* let createsMoreXOnTheLeft x rl =
   let r's = calculateDXR rl x in
   (* todo to do: we do not need to calculate h_rx_to_r, it suffices to take the inclusion function *)
@@ -249,13 +249,13 @@ let createsMoreXOnTheLeft x rl =
   | [] -> None
   | h_rx_to_l :: _ -> Some (x, rx, h_k_to_rx, h_rx_to_l, h_rx_to_r) *)
 
-let createsMoreXOnTheLeftBool graph rule =
+(* let createsMoreXOnTheLeftBool graph rule =
   match createsMoreXOnTheLeft graph rule with
   |None -> false
-  |Some _ -> true
+  |Some _ -> true *)
  
 
-let%expect_test "" = 
+(* let%expect_test "" = 
   let grs_ex69_variant_r1_r = Homo.fromList 
     [1;2;3] []
     [1;2;3;4] [(1,"s",3,1); (3,"0",3,2); (2,"s",4,3); (4,"0",4,4)]
@@ -478,10 +478,10 @@ let%expect_test "" =
   arrows : [ (1,s,3,1);(2,s,4,3);(3,0,3,2);(4,0,4,4) ]
   hv:[(1,1);(2,2);(3,3)]
   he:[(1,1);(2,2)]
-    |}]
+    |}] *)
 
 
-let%expect_test "" = 
+(* let%expect_test "" = 
   let bruggink_2014_example_4_l = Homo.fromList
   [1;2] [] 
   [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
@@ -541,7 +541,7 @@ let%expect_test "" =
     arrows : [ (1,a,3,1);(3,b,4,2);(4,a,2,3) ]
     hv:[(1,1);(2,2);(3,3);(4,4)]
     he:[(1,1);(3,3)]
-    |}]
+    |}] *)
 let hasMoreOccurrencesOnleft x rl =
   let homoXL = Homo.homSet x (Grs.leftGraph rl) in
   let homoXL = List.filter Homo.isInjOnArrows homoXL in

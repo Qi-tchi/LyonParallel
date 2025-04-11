@@ -8,18 +8,17 @@ module MapInt = Map.Make(Int)
 module RuleMap = Grs.RuleMap
 module GraphHomoSet = Homo.GraphHomoSet
 module GraphHomoMap = Homo.GraphHomoMap
-
 module type Parm = sig
   val grs : ConcretGraphRewritingSystems.named_grs
-  val size : int
-  val integer : bool
+  val size : int 
+  val integer : bool 
   val ub : int
   (* val monic_matching : bool *)
-  val opt : bool 
+  val opt : bool  
   val semiring : Semiring.semiring_t
   val file_name : string
 end
-let file_name semiring size ub integer = Printf.sprintf "%s_size%d_maxW%d_%s" (Semiring.string_of_semiring_t semiring) size (ub) (if integer then "int" else "float")
+let file_name semiring size ub integer = Printf.sprintf "%s_size%d_maxW%d_%s" (Semiring.string_of_semiring_t semiring) size ub (if integer then "int" else "float")
 module Make (P:Parm) = struct  
   (* let delta = 0.000001 *)
   let rules_l = P.grs.grs  
@@ -473,8 +472,9 @@ let _ =
       let ya = y a in
       assert(List.mem_assoc xa !vars && List.mem_assoc ya !vars);
       (* variable range *)
-      let s = if integer then
-        Printf.sprintf
+      let s = if integer then 
+        begin
+        (* Printf.sprintf
         "(assert 
                   (and (>= %s 0) 
                        (<= %s %d)
@@ -492,29 +492,59 @@ let _ =
           (<= %s %d.0)
       )
     )\n" 
-      (List.assoc ya !vars) (List.assoc ya !vars) ub
+      (List.assoc ya !vars) (List.assoc ya !vars) ub *)
+      Printf.sprintf
+      "(assert 
+                (>= %s 0) 
+                )\n"
+      (List.assoc ya !vars) 
+      ^ 
+      if ub <> 0 then Printf.sprintf
+        "(assert 
+                (<= %s %d)
+                  )\n"
+      (List.assoc ya !vars) ub 
+  else ""
+      end
+    else
+      Printf.sprintf
+      "(assert 
+      (>= %s 0.0) 
+    )\n"
+    (List.assoc ya !vars)
+    (* "(assert 
+    (and (>= %s 0.0) 
+        (<= %s %d.0)
+    )
+  )\n" 
+    (List.assoc ya !vars) (List.assoc ya !vars) ub *)
       in 
       if P.semiring = Tropical then output_string oc s;
       if P.semiring = Arctic then output_string oc s; 
       (*arithmetic *)
       if P.semiring = Arithmetic then begin
         let s = if integer then 
-          Printf.sprintf
-          (* "(assert (>= %s 1))\n"
-          (List.assoc ya !vars)   *)
+          (* Printf.sprintf
           "(assert 
           (and (>= %s 1) 
                (<= %s %d)
           )
           )\n"
-          (List.assoc ya !vars) (List.assoc ya !vars) ub  
-          (* Printf.sprintf
-          "(assert 
-                    (and (>= %s 1) 
-                        (<= %s %d)
-                    )
-          )\n"
-          (List.assoc ya !vars) (List.assoc ya !vars) ub *)
+          (List.assoc ya !vars) (List.assoc ya !vars) ub   *)
+          begin
+            Printf.sprintf
+            "(assert 
+                      (>= %s 1) 
+                      )\n"
+            (List.assoc ya !vars) 
+            ^ 
+            if ub <> 0 then Printf.sprintf
+              "(assert 
+                      (<= %s %d)
+                        )\n"
+            (List.assoc ya !vars) ub 
+            else ""
+          end
           else
           (* Printf.sprintf
           "(assert 
@@ -1412,76 +1442,3 @@ let file_contains str filename =
   let res = check_file ic in
   close_in ic;
   res
-
-
-
-  (* arithmetic 
-  endrullis_2023_ex6d2_named
-   float 
-  size 2
-  unrestricted Matching
-  opt 
-   *)
-   (* let%expect_test "endrullis_2023_ex6d2_named" = 
-   let module P :Parm = struct   
-     let grs = ConcretGraphRewritingSystems.endrullis_2024_ex6_2
-     let size = 2
-     let integer = false
-     let ub = 1
-     (* let monic_matching = true *)
-     let opt = true
-     let semiring = Semiring.Arithmetic
-     let file_name = file_name semiring size ub integer
-   end in
-   let approach = if P.semiring = Arctic then "arctic" else if P.semiring = Tropical then "tropical" else "arithmetic" in
-   let originalWeights = if P.integer then false else true in
-   let module _ = Make (P) in
-   Sys.command (Printf.sprintf "z3 /Users/qi/Desktop/nwf/tmp/%s.smt2 > /Users/qi/Desktop/nwf/tmp/%s.out" P.file_name P.file_name) |> ignore;
-   if (file_contains (Printf.sprintf "/Users/qi/Desktop/nwf/tmp/%s.out" P.file_name) "unsat") |> not then begin
-     Sys.command (Printf.sprintf "python3 /Users/qi/Desktop/nwf/lib3/interp.py %s %s %s %s" approach (if P.integer then "int" else "float") (if originalWeights then "True" else "False") P.file_name) |> ignore;
-     (* Interp_ocaml.interp approach (if P.integer then "int" else "float") originalWeights; *)
-     Sys.command (Printf.sprintf "cat /Users/qi/Desktop/nwf/tmp/%s.interp" P.file_name) |> ignore;
-     (* Sys.command (Printf.sprintf "rm /Users/qi/Desktop/nwf/tmp/%s.out /Users/qi/Desktop/nwf/tmp/%s.interp" approach approach) |> ignore; *)
-   end;
-   (* Sys.command (Printf.sprintf "rm /Users/qi/Desktop/nwf/tmp/%s.smt2" approach) |> ignore; *)
-   ;[%expect {|
-  y_0--e->1 : 1.0
-  y_1--e->0 : 2438.0
-  y_0--e->0 : 2.0
-  y_1--e->1 : 3675.0
-
-  y_0--e->1 : 1
-  y_1--e->0 : 2438
-  y_0--e->0 : 2
-  y_1--e->1 : 3675
-
-  rules eliminated?:
-  rule 0: true
- |}]   *)
-
-(* bruggink_2014_ex_1
-  tropical  0<=float<=1  |T|=1 unrestricted matching
-  !!! non tropical terminating
-  *)
-  (* let%expect_test "bruggink_2014_ex_1_tropical_float_unrestrictedMatching" = 
-  let module P :Parm = struct   
-    
-    let grs = ConcretGraphRewritingSystems.bruggink_2014_ex1
-    let size = 2
-    let integer = false 
-    let ub = 1
-    let monic_matching = false
-    let opt = true
-    let semiring = Semiring.Tropical
-    let file_name = file_name semiring size ub integer
-  end in
-  let module _ = Make (P) in
-  Sys.command (Printf.sprintf "z3 /Users/qi/Desktop/nwf/tmp/tropical.smt2 > /Users/qi/Desktop/nwf/tmp/tropical.out") |> ignore;
-  if (file_contains_unsat (Printf.sprintf "/Users/qi/Desktop/nwf/tmp/tropical.out")) |> not then begin
-    Sys.command (Printf.sprintf "python3 /Users/qi/Desktop/nwf/lib3/interp.py tropical float") |> ignore;
-    Sys.command (Printf.sprintf "cat /Users/qi/Desktop/nwf/tmp/tropical.interp") |> ignore;
-    Sys.command (Printf.sprintf "rm /Users/qi/Desktop/nwf/tmp/tropical.out /Users/qi/Desktop/nwf/tmp/tropical.interp") |> ignore;
-  end;
-  Sys.command (Printf.sprintf "rm /Users/qi/Desktop/nwf/tmp/tropical.smt2") |> ignore;
-  ;[%expect {|
-  |}] *)
