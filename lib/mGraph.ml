@@ -330,7 +330,9 @@ module Graph = struct
       arrows : [ (1,s,3,1);(3,0,3,2) ]
       sg [21] : nodes : [ 1;2;3 ]
       arrows : [ (1,s,3,1);(2,s,3,3);(3,0,3,2) ]
-    |}]
+    |}];;
+
+  (** [isSubGraphOf sg g] is true if [sg] is a labeled subgraph of [g] **)
   let isSubGraphOf sg g = 
     Ulg.isSubGraphOf (sg |> unlabelled) (g |> unlabelled) &&
     let ars = arrows sg in
@@ -434,7 +436,34 @@ module Graph = struct
   let propreSubgraphs lg = 
     List.filter (fun sg -> isProperSubgraph sg lg) (subGraphs lg)
   let isSingleton g = order g = 1 && size g = 0
+  let%expect_test "" =
+    let y = fromList [1;3] [(1,"s",3,1)] in
+    let z = fromList [5] [] in
+    let w = fromList [4] [] in
+    let x = fromList 
+    [1;2;3;4;5] 
+    [(1,"s",3,1);(3,"0",3,2); (2,"s",4,3); (4,"0",4,4);
+    (5,"0",5,5);(5,"0",5,6);(5,"0",5,7);] in
+    let sgs = propreSubgraphs x  in
+    let sgs_contains_ss = List.filter (isSubGraphOf y) sgs in
+    let sgs_contains_z = List.filter (fun g -> isSubGraphOf z g |> not) sgs_contains_ss in
+    let sgs_contains_w = List.filter (fun g -> isSubGraphOf w g |> not) sgs_contains_z in
+    Printf.printf "nb propre subgraphs : %d\n" 
+      (List.length sgs_contains_w);
+    List.iteri (fun i sg -> Printf.printf "sg [%d] : %s\n" i (sg |> toStr)) sgs_contains_w;
+    [%expect {|
+      nb propre subgraphs : 4
+      sg [0] : nodes : [ 1;3 ]
+      arrows : [ (1,s,3,1) ]
+      sg [1] : nodes : [ 1;3 ]
+      arrows : [ (1,s,3,1);(3,0,3,2) ]
+      sg [2] : nodes : [ 1;2;3 ]
+      arrows : [ (1,s,3,1) ]
+      sg [3] : nodes : [ 1;2;3 ]
+      arrows : [ (1,s,3,1);(3,0,3,2) ]
+    |}]
 
+    
   let%test "" = 
     fromList [1] [] |> isSingleton
   let%test "" = 

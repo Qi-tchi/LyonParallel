@@ -936,11 +936,11 @@ let r1_r = Homo.fromList
   [1;2;3] []
   [1;2;3;4;5] 
   [(1,"s",3,1);(3,"0",3,2); (2,"s",4,3); (4,"0",4,4);
-  (5,"0",5,5);(5,"0",5,6);(5,"0",5,7);]
+  (5,"0",5,5);(5,"0",5,6);(5,"0",5,7);] 
   [(1,1);(2,2);(3,3)] 
   [] 
-let my_rule = Grs.fromHomos r1_l r1_r
-let my_ex45 = fromRulesListAndName ~monic_matching:true [my_rule] "my_ex45"
+let my_ex45_my_rule = Grs.fromHomos r1_l r1_r
+let my_ex45 = fromRulesListAndName ~monic_matching:true [my_ex45_my_rule] "my_ex45_hal_or_ex47_icgt"
 
 
 (**************)

@@ -30,6 +30,7 @@ nb_process_spawn_for_z3_arctic
 nb_process_spawn_for_z3_arithmetic 
  (module P:TypeGraph.Parm) start_time 
  =
+  let st = Unix.gettimeofday () in
   (* Use the shell to run the command 'c' *)
   let input_file = args.(0) in
   let output_file = args.(1) in
@@ -72,6 +73,9 @@ nb_process_spawn_for_z3_arithmetic
   My_unix.monitor_loop pid timeout stop_all_threads start_time (module P:TypeGraph.Parm); 
  
   close_out oc;
+  print_string (Printf.sprintf "\n\n\n****\n\n*** time : %f \n \n\n\n****\n\n*** \n\n\n****\n\n*** " (Unix.gettimeofday () -. st));
+  flush Stdio.stdout;
+  (* Wait for the process to finish *)
   if debug then begin
     let _ = Atomic.fetch_and_add nb_process_spawn_for_z3 (-1) in
     match P.semiring with

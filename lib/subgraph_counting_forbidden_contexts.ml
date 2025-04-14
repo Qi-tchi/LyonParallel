@@ -129,7 +129,8 @@ let%expect_test "" =
   |}]
 let calculateDXR (x:MGraph_ext.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomomorphism.t) list = 
   (* assertion : rl injective rule  *)
-  assert (Homo.isInj rl.l && Homo.isInj rl.r);
+  (* assert (Homo.isInj rl.l && Homo.isInj rl.r); *)
+  assert (Grs.isInjectiveRule rl);
   let rhsGraph = Rule.rightGraph rl in
   (* body *)
   let r's =  
@@ -158,6 +159,9 @@ let calculateDXR (x:MGraph_ext.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomo
          can_construct_pbpo_diagram x rl) *)
         in
     r's 
+
+
+  
 
  
 let%expect_test "icgt25_example_32" = 
@@ -193,6 +197,18 @@ let%expect_test "" =
     nodes : [ 1;2;4 ]
     arrows : [ (1,a,4,1) ]
   |}]
+
+
+let%expect_test "" = 
+let x = { x=MGraph_ext.fromList [1;2;3] [(1,"s",2,1);(3,"s",2,2)]; fx = None} in
+let rho = ConcretGraphRewritingSystems.my_ex45_my_rule in
+calculateDXR x.x rho  
+|>
+List.iter (fun (h_k'r', _) -> let g = Homo.codom h_k'r' in Printf.sprintf "\n%s\n" (MGraph_ext.toStr g) |> print_string);
+[%expect{|
+    nodes : [ 1;3 ]
+    arrows : [ (1,s,3,1) ]
+|}]
 
 
 let%expect_test "" = 

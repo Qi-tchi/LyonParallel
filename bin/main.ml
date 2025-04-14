@@ -204,7 +204,7 @@ let cmd_try_typegraph system auto_defaut_strategies time =
   cmd_showme ();
 ;;
 
-let cmd_try_typegraph_no_auto system smrs_info timeout =
+(* let cmd_try_typegraph_no_auto system smrs_info timeout =
   cmd_select_system system;
   cmd_timeout timeout;
   cmd_reset_strategies ();
@@ -214,7 +214,18 @@ let cmd_try_typegraph_no_auto system smrs_info timeout =
     smrs_info;
   cmd_run ();
   cmd_showme ();
-;;
+;; *)
+let cmd_try_typegraph_no_auto system smrs_info timeout =
+  cmd_select_system system;
+  cmd_timeout timeout;
+  cmd_reset_strategies ();
+  List.iter (fun (s,n,integerOrNot) -> cmd_add_strategy (Parallel.User 
+    (Parallel.Strat (s,n,integerOrNot,0,false))))
+    (* Semiring.semiring_t * size_t * integerOrNot * maxWeight_t * optimizedTypegraph_t -> strategy_t)  *)
+    smrs_info;
+  cmd_run ();
+  cmd_showme ();;
+
 
 let cmd_try_subgraph_counting_no_forbidden_context system =
   (* todo : unify two systems *)
@@ -224,7 +235,6 @@ let cmd_try_subgraph_counting_no_forbidden_context system =
   let _ = Termination.interpret res in
   ()
 ;;
-
 let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
   (* todo : unify two systems *)
   let system = List.nth systems system in
