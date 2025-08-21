@@ -2,19 +2,24 @@
 opam-version: "2.0"
 synopsis: "Automated tool for termination analysis of DPO rewriting systems"
 description: """
-LyonParallel is a lightweight prototype for termination analysis of DPO rewriting systems on finite directed edge-labeled multigraphs.  
+LyonParallel is a lightweight prototype for termination analysis of DPO rewriting systems on directed, edge-labeled multigraphs.  
 Implemented in OCaml under the LGPL 2.1 license, it integrates four methods:  
 (1) Well-founded semiring-based termination (Endrullis et al., ICGT 2024),  
 (2) Non-well-founded semiring extensions (QIU, HAL report hal-04954960),  
 (3) A subgraph-counting criterion (QIU, ICGT 2025),  
 (4) An extension of the subgraph-counting criterion accounting antipatterns (QIU, HAL report hal-04973012).  """
-maintainer: []
+maintainer: ["Qi QIU"]
 authors: ["Qi QIU"]
 license: "LICENSE"
-tags: ["termination" "graph rewriting" "graph transformation"]
+tags: [
+  "termination"
+  "relative termination"
+  "graph transformation"
+  "graph rewriting"
+]
 homepage: "https://github.com/Qi-tchi/LyonParallel"
-doc: "to do"
-bug-reports: "https://github.com/username/reponame/issues"
+doc: ""
+bug-reports: "https://github.com/Qi-tchi/LyonParallel/issues"
 depends: [
   "dune" {>= "3.16"}
   "ocaml"
@@ -34,4 +39,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/username/reponame.git"
+dev-repo: "git+https://github.com/Qi-tchi/LyonParallel.git"

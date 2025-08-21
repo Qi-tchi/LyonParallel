@@ -13,7 +13,7 @@
 
 (license LICENSE)
 
-(documentation)
+(documentation "")
 
 (package
  (name LyonParallel)
