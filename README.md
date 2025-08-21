@@ -38,7 +38,7 @@
 
 ### Try Subgraph Counting Method with no forbidden context
 
-method presented in 
+method presented in
 
 * Qi Qiu. Termination of Injective DPO Graph Rewriting Systems using Subgraph Counting. Université Claude Bernard Lyon 1. 2025. ⟨hal-04955684⟩
 
@@ -126,7 +126,7 @@ On success:
 
 ### Try Type Graph Method with Non-well-founded Semirings
 
-Method Presented in 
+Method Presented in
 
 * Qi Qiu. Termination of Graph Rewriting using Weighted Type Graphs over Non-well-founded Semirings. Université Claude Bernard Lyon 1 (UCBL), Lyon, FRA. 2025. ⟨hal-04954960⟩
 
@@ -201,6 +201,3 @@ Displays the constructed weighted type graphs.
   - Applied strategies
   - Termination status
   - Elapsed runtime
-
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

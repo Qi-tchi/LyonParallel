@@ -5,19 +5,19 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github Qi-tchi/LyonParallel))
 
-(authors "Author Name <author@example.com>")
+(authors "Qi QIU")
 
-(maintainers "Maintainer Name <maintainer@example.com>")
+(maintainers "Qi QIU")
 
 (license LICENSE)
 
-(documentation https://url/to/documentation)
+(documentation)
 
 (package
  (name LyonParallel)
- (synopsis "A short synopsis")
+ (synopsis "Automated tool for termination analysis of DPO rewriting systems")
  (description "LyonParallel is a lightweight prototype for termination analysis of DPO rewriting systems on directed, edge-labeled multigraphs.  
 Implemented in OCaml under the LGPL 2.1 license, it integrates four methods:  
 (1) Well-founded semiring-based termination (Endrullis et al., ICGT 2024),  
@@ -26,6 +26,6 @@ Implemented in OCaml under the LGPL 2.1 license, it integrates four methods:
 (4) An extension of the subgraph-counting criterion accounting antipatterns (QIU, HAL report hal-04973012).  ")
  (depends ocaml)
  (tags
-  ("add topics" "to describe" your project)))
+  ("termination" "relative termination" "graph transformation" "graph rewriting")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html
