@@ -697,8 +697,8 @@ let bruggink_2014_ex_4_r = Homo.fromList
   [1;2] []
   [1;2;4;5] [(1,"a",4,1);(4,"b",5,2);(5,"a",2,3);]
   [(1,1);(2,2)] []
-let bruggink_2014_ex_4 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
-let bruggink_2014_ex_4_rl_1 = Grs.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
+let bruggink_2014_ex_4 = Grs.DPOrule.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
+let bruggink_2014_ex_4_rl_1 = Grs.DPOrule.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
 let bruggink_2014_ex6 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2014_ex_4_and_6"
 let bruggink_2015_ex2 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2015_ex2"
 let bruggink_2014_ex4_problem =  pbFromList [bruggink_2014_ex_4]

@@ -1,18 +1,21 @@
 ## Installation
 
 1. ```bash
-   # Initialize OPAM (if not already initialized)
+   # Install OPAM
+   ```
+2. ```bash
+   # Run the following command and follow the instructions to initialize OPAM (if not already initialized)
    opam init
 
-   # Create and switch to a new OPAM switch
-   opam switch create icgt25 5.2.1
+   # Run the following command and follow the instructions to create and switch to a new OPAM switch
+   opam switch create lyonParallel 5.2.1
 
    # Install packages
    opam install dune batteries domainslib atomic z3 core ppx_inline_test ppx_expect
 
    eval $(opam env)
    ```
-2. **Build the Project** using Dune:The project is configured with a `dune` file that specifies the library and executable targets along with their dependencies.
+3. **Build the Project using Dune**: The project is configured with a `dune` file that specifies the library and executable targets along with their dependencies.
 
    ```bash
    # Build the project
@@ -21,26 +24,26 @@
    # Install
    dune install
    ```
-3. **Run the Executable**:
+4. **Run the Executable**:
    After a successful build, execute the REPL:
 
-   ```bash
    # Using dune exec
-   Icgt25
-   ```
+
+   LyonParallel
 
    Upon launching, you should see:
+
 
    ```
    Type 'help' for a list of commands.
    >>
    ```
 
-### Try Subgraph Counting Method with no forbidden context
+### Try Morphism Counting Method with no forbidden context
 
 method presented in
 
-* Qi Qiu. Termination of Injective DPO Graph Rewriting Systems using Subgraph Counting. Université Claude Bernard Lyon 1. 2025. ⟨hal-04955684⟩
+* Qi Qiu. Termination of Injective DPO Graph Rewriting Systems using Morphism Counting. Université Claude Bernard Lyon 1. 2025. ⟨hal-04955684⟩
 
 **Implementation Notes:**
 
@@ -67,18 +70,18 @@ On success:
 ...
 ```
 
-* The subgraph counting method is defined in
+* The morphism counting method is defined in
   `lib/termination.ml`
 
 ---
 
 ---
 
-### Try Subgraph Counting Method with ruler-graph with one forbidden context
+### Try Morphism Counting Method with ruler-graph with one forbidden context
 
 Method presented in
 
-* Qi Qiu. Proving Termination of Injective DPO Graph Rewriting Systems using Subgraph Counting. Université Claude Bernard Lyon 1. 2025. ⟨hal-04973012⟩
+* Qi Qiu. Proving Termination of Injective DPO Graph Rewriting Systems using Morphism Counting. Université Claude Bernard Lyon 1. 2025. ⟨hal-04973012⟩
 
 **Implementation Notes:**
 
@@ -117,7 +120,7 @@ On success:
 ...
 ```
 
-* The subgraph counting method is defined in
+* The morphism counting method is defined in
   `lib/subgraph_counting_forbidden_contexts.ml`
 
 ---
@@ -132,11 +135,11 @@ Method Presented in
 
 **Example Usage:**
 
+This following command lists all **available** systems:
+
 ```
 systems
 ```
-
-This command lists all **available** systems.
 
 ```
 >> try_type_graph 0 30.0 a
