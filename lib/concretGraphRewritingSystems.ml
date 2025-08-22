@@ -14,6 +14,7 @@ type problem = {
 let isEmpty pb = Grs.RuleSet.is_empty pb.rules
 let pbFromList rules = {rules = Grs.RuleSet.of_list rules; witnesses =[]}
 
+let rules_of_problem pb = pb.rules |> Grs.RuleSet.elements
 let named_grs_to_problem s = 
   pbFromList s.grs 
 

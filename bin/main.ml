@@ -22,7 +22,8 @@ let help_msg () = (Printf.sprintf "Type 'help' for help.")
 let cmd_select_processing n cmd = 
   try 
     let res = `System (n|> int_of_string) in
-    reset_sol_file := true; res
+    reset_sol_file := true; 
+    res
   with _ -> `Undefined (undefined_command_msg cmd)
 
 
@@ -33,7 +34,7 @@ let cmd_reset_strategies () =
     Printf.printf "Original System: %s\nRules remained: %s\nLog:%s\nInvolved Strategies:%s\nStrategies: %s\nTerminating: %s\nReset_solution_file_next_run: %b\nResolution Time: %f\n" 
     (* original system *)
     (match !system with
-    | None -> "None" 
+    | None -> "no system selected" 
     | Some grs -> grs.name) 
     (* remaind rules *)
     (match !system, !system_current with
@@ -44,7 +45,7 @@ let cmd_reset_strategies () =
       )
       grs.grs)
       |> List.filter (fun x -> x >= 0)
-      |> List.map Int.to_string |> String.concat ";"
+      |> List.map (fun x ->Printf.sprintf " rule %s " (Int.to_string x))|> String.concat ";"
     |None, None -> "[]"
     |_ -> failwith __LOC__)
     (* log *)
@@ -106,7 +107,7 @@ let cmd_run () =
         reset_sol_file := false;
         time := !time +. (Unix.gettimeofday () -. start_time);
       end;
-    cmd_recap ()
+    (* cmd_recap () *)
     | _ -> 
       begin 
         Printf.printf "Something is wrong\n"; 
@@ -142,7 +143,7 @@ let cmd_show_ruler_graphs () =
       |> print_endline
     ) 
     Ruler_graph.ruler_graphs
-let cmd_try_typegraph_processing system auto_defaut_strategies timeout =
+let cmd_try_type_graph_processing system auto_defaut_strategies timeout =
   try
     let system = int_of_string system in
     let strategies = List.map 
@@ -167,10 +168,37 @@ let cmd_try_typegraph_processing system auto_defaut_strategies timeout =
     (* ['a';'n';'t';'N';'A';'T'] in *)
     auto_defaut_strategies  in
     let timeout = float_of_string timeout in
-    `try_typegraph (system,strategies,timeout) (* auto_defaut_strategies is a word from {a,n,t,A,N,T}*, ex: ant,ANt,Ta *)
+    `try_type_graph (system,strategies,timeout) (* auto_defaut_strategies is a word from {a,n,t,A,N,T}*, ex: ant,ANt,Ta *)
   with _ -> failwith __LOC__
 
-let cmd_try_typegraph_no_auto_processing system nb_smr smrs =
+let cmd_type_graph_processing auto_defaut_strategies timeout =
+  try
+    let strategies = List.map 
+    (fun s ->
+      (* if List.mem s auto_defaut_strategies then *)
+      match s with
+      (* | 'a' -> Some Parallel.Auto_total_int_arctic  
+      | 'n' -> Some Auto_total_int_arithmetic  
+      | 't' -> Some Auto_total_int_tropical 
+      | 'A' -> Some Auto_total_real_arctic 
+      | 'N' -> Some Auto_total_real_arithmetic  
+      | 'T' -> Some Auto_total_real_tropical   *)
+      | "A" -> Parallel.Auto_total_int_arctic  
+      | "N" ->  Auto_total_int_arithmetic  
+      | "T" -> Auto_total_int_tropical 
+      | "a" ->  Auto_total_real_arctic 
+      | "n" -> Auto_total_real_arithmetic  
+      | "t" ->  Auto_total_real_tropical  
+      | _ -> failwith __LOC__
+      (* else assert false *)
+    )
+    (* ['a';'n';'t';'N';'A';'T'] in *)
+    auto_defaut_strategies  in
+    let timeout = float_of_string timeout in
+    `type_graph (strategies,timeout) (* auto_defaut_strategies is a word from {a,n,t,A,N,T}*, ex: ant,ANt,Ta *)
+  with _ -> failwith __LOC__
+
+let cmd_try_type_graph_no_auto_processing system nb_smr smrs =
   try
     let system = int_of_string system in
     let nb_smr = int_of_string nb_smr in
@@ -186,7 +214,7 @@ let cmd_try_typegraph_no_auto_processing system nb_smr smrs =
         ):: !smrs_info
     done;
     let timeout = 200.0 in
-    `try_typegraph_no_auto (system,!smrs_info,timeout) 
+    `try_type_graph_no_auto (system,!smrs_info,timeout) 
   with _ -> failwith __LOC__
 
 let cmd_showme () = 
@@ -195,16 +223,24 @@ let cmd_showme () =
   | false ->
     print_endline "try some methods before.\n"
   
-let cmd_try_typegraph system auto_defaut_strategies time =
+let cmd_try_type_graph system auto_defaut_strategies time =
   cmd_select_system system;
   cmd_timeout time;
   cmd_reset_strategies ();
   List.iter cmd_add_strategy auto_defaut_strategies;
   cmd_run ();
-  cmd_showme ();
+  (* cmd_showme (); *)
+;;
+(*iterative version of cmd_try_type_graph*)
+let cmd_type_graph auto_defaut_strategies time =
+  cmd_timeout time;
+  cmd_reset_strategies ();
+  List.iter cmd_add_strategy auto_defaut_strategies;
+  cmd_run ();
+  (* cmd_showme (); *)
 ;;
 
-let cmd_try_typegraph_no_auto system smrs_info timeout =
+let cmd_try_type_graph_no_auto system smrs_info timeout =
   cmd_select_system system;
   cmd_timeout timeout;
   cmd_reset_strategies ();
@@ -213,7 +249,7 @@ let cmd_try_typegraph_no_auto system smrs_info timeout =
     (* Semiring.semiring_t * size_t * integerOrNot * maxWeight_t * optimizedTypegraph_t -> strategy_t)  *)
     smrs_info;
   cmd_run ();
-  cmd_showme ();
+  (* cmd_showme (); *)
 ;;
 
 let cmd_try_subgraph_counting_no_forbidden_context system =
@@ -224,14 +260,37 @@ let cmd_try_subgraph_counting_no_forbidden_context system =
   let _ = Termination.interpret res in
   ()
 ;;
+let cmd_subgraph_counting_no_forbidden_context () =
+  (* todo : unify two systems *)
+   match !system_current with
+  | None -> failwith "No system selected"
+  | Some system ->
+  let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
+  let res = Termination.isTerminating pb in
+  system_current := Some (ConcretGraphRewritingSystems.fromRulesListAndName (ConcretGraphRewritingSystems.rules_of_problem res) system.name);
+;; 
 
 let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
   (* todo : unify two systems *)
   let system = List.nth systems system in
   let (rulergraph,_,description) = List.nth Ruler_graph.ruler_graphs rulergraph in
   match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context rulergraph system with
-  | true, report -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline
-  | false, report -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
+  | true, report,_ -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline
+  | false, report,_ -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
+;;
+let cmd_subgraph_counting_one_forbidden_context (rulergraph) =
+  (* todo : unify two systems *)
+  match !system_current with
+  | None -> failwith "No system selected"
+  | Some system -> 
+  let (rulergraph,_,_) = List.nth Ruler_graph.ruler_graphs rulergraph in
+  match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context rulergraph system with
+  | true, _, remained_rules -> 
+    begin
+      (* Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: %s" report description |> print_endline *)
+      system_current := Some ( ConcretGraphRewritingSystems.fromRulesListAndName remained_rules (Option.get !system_current).name);
+    end 
+  | false, report,_ -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
 ;;
 
 let handle_command cmd =
@@ -246,11 +305,17 @@ let handle_command cmd =
   | ["reset_strategies"] -> `Reset_strategies 
   | ["showme"] -> `show_certificat
   | ["run"] -> `run
-  | "try_type_graph" :: system :: timeout :: auto_defaut_strategies -> cmd_try_typegraph_processing system auto_defaut_strategies timeout
+  | "try_type_graph" :: system :: timeout :: auto_defaut_strategies -> cmd_try_type_graph_processing system auto_defaut_strategies timeout
+  (* iterative version *)
+  | "type_graph" :: timeout :: auto_defaut_strategies -> cmd_type_graph_processing auto_defaut_strategies timeout
   | "try_type_graph_no_auto" :: nb_smr :: system :: smrs ->
-  cmd_try_typegraph_no_auto_processing system nb_smr smrs
+  cmd_try_type_graph_no_auto_processing system nb_smr smrs
   | "try_subgraph_counting_no_forbidden_context" :: system :: []-> `try_subgraph_counting_no_forbidden_context (int_of_string system)
+  | "subgraph_counting_no_forbidden_context" :: [] -> 
+    `subgraph_counting_no_forbidden_context
   | "try_subgraph_counting_one_forbidden_context" :: system :: [rg]-> `try_subgraph_counting_one_forbidden_context (int_of_string system, int_of_string rg)
+  (* iterative version *)
+  | "subgraph_counting_one_forbidden_context" :: [rg]-> `subgraph_counting_one_forbidden_context (int_of_string rg)
   | ["recap"] -> `recap 
   | ["help"] ->
     `Print_help_msg 
@@ -393,10 +458,13 @@ let rec repl () =
       | `System n -> cmd_select_system n
       | `show_certificat -> cmd_showme ()
       | `run -> cmd_run ()
-      |`try_typegraph (system,auto_defaut_strategies,timeout) -> 
-        cmd_try_typegraph system auto_defaut_strategies timeout
-      |`try_typegraph_no_auto (system,smrs_info,timeout) ->
-        cmd_try_typegraph_no_auto system smrs_info timeout 
+      |`try_type_graph (system,auto_defaut_strategies,timeout) -> 
+        cmd_try_type_graph system auto_defaut_strategies timeout
+      (*iterative version of try_type_graph*)
+      |`type_graph (auto_defaut_strategies,timeout) -> 
+        cmd_type_graph auto_defaut_strategies timeout
+      |`try_type_graph_no_auto (system,smrs_info,timeout) ->
+        cmd_try_type_graph_no_auto system smrs_info timeout 
       | `Print_help_msg msg -> print_endline msg;
       | `Undefined msg -> print_endline msg;
       | `Reset_strategies -> cmd_reset_strategies ()
@@ -405,7 +473,12 @@ let rec repl () =
         cmd_add_strategy app
       | `recap -> cmd_recap ()
       | `try_subgraph_counting_no_forbidden_context system -> cmd_try_subgraph_counting_no_forbidden_context system
+      (* iterative *)
+      | `subgraph_counting_no_forbidden_context ->  cmd_subgraph_counting_no_forbidden_context ()
       | `try_subgraph_counting_one_forbidden_context args -> cmd_try_subgraph_counting_one_forbidden_context args
+      (* iterative *)
+      | `subgraph_counting_one_forbidden_context args -> cmd_subgraph_counting_one_forbidden_context args
+      
       
     with
     (* Handle Ctrl+D (end of input) gracefully *)

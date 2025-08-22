@@ -167,7 +167,7 @@ type grs = RuleSet.t
 
   let size grs = RuleSet.cardinal grs 
   let rulesl grs = RuleSet.elements grs
-
+  let rules_of_systems grs = RuleSet.elements grs
   let labels grs = 
     let ls = rulesl grs |> List.map labelsRule in
     List.fold_right 

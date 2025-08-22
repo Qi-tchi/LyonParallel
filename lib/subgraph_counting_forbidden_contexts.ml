@@ -1281,7 +1281,8 @@ let%expect_test "" =
 
 
   
-let terminating_counting_subgraph_with_forbidden_context (x:Ruler_graph.rulerGraph) (grs:ConcretGraphRewritingSystems.named_grs) = 
+  (* before iterative modification 22 aug 2025*)
+(* let terminating_counting_subgraph_with_forbidden_context (x:Ruler_graph.rulerGraph) (grs:ConcretGraphRewritingSystems.named_grs) = 
   let terminating = ref true in
   let report = ref "" in
   List.iteri 
@@ -1293,11 +1294,28 @@ let terminating_counting_subgraph_with_forbidden_context (x:Ruler_graph.rulerGra
       report := !report ^ Printf.sprintf "rule %d\nX-occurrences not forbiddened predictable : %b\nstrictly decreasing X-occurrences : %b (%d => %d)\n\n" i predictable (nb_l > nb_r) nb_l nb_r
     )
     grs.grs;
-  !terminating, !report
+  !terminating, !report *)
+
+let terminating_counting_subgraph_with_forbidden_context (x:Ruler_graph.rulerGraph) (grs:ConcretGraphRewritingSystems.named_grs) = 
+  let eliminated_rules = ref [] in
+  let terminating = ref true in
+  let report = ref "" in
+  List.iteri 
+    (fun i rho ->
+      let predictable = isPredictable x rho in
+      let (occs_x_l, occs_x_r) = occs_graph_with_forbidden_context_strictly_decreasing x rho in
+      let nb_l, nb_r = (List.length occs_x_l, List.length occs_x_r) in
+      terminating := !terminating && predictable && (nb_l >= nb_r);
+      if (nb_l > nb_r) then eliminated_rules := !eliminated_rules @ [rho];
+      report := !report ^ Printf.sprintf "rule %d\nX-occurrences not forbiddened predictable : %b\nstrictly decreasing X-occurrences : %b (%d => %d)\n\n" i predictable (nb_l > nb_r) nb_l nb_r
+    )
+    grs.grs;
+  terminating := !terminating && (not (List.is_empty !eliminated_rules));
+  !terminating, !report, (GraphRewritingSystem.RuleSet.diff (GraphRewritingSystem.RuleSet.of_list grs.grs) (GraphRewritingSystem.RuleSet.of_list !eliminated_rules))|> GraphRewritingSystem.RuleSet.elements
 
 let%expect_test "" = 
   let x = nn_not_in_nen in
-  let terminating, report = terminating_counting_subgraph_with_forbidden_context x ConcretGraphRewritingSystems.endrullis_2024_exd3 in
+  let terminating, report,_ = terminating_counting_subgraph_with_forbidden_context x ConcretGraphRewritingSystems.endrullis_2024_exd3 in
   (* print_endline "main func test";  *)
   Printf.sprintf "endrullis_2024_exd3\nterminating : %b\n%s" terminating report 
   |> print_endline
