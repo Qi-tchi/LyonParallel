@@ -14,7 +14,7 @@ let subgraph_of_rk  (rl:Rule.t) rp =
   MGraph_ext.isSubGraphOf rp im_r_k
 
 let%expect_test "" = 
-  (* let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in *)
+  (* let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in *)
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
@@ -39,7 +39,7 @@ let%expect_test "" =
 let iso_to_x x rp =
   MGraph_ext.iso rp x
 let%expect_test "" = 
-  let (x:Ruler_graph.rulerGraph) = { x = MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let (x:Ruler_graph.rulerGraph) = { x = MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
@@ -82,7 +82,7 @@ let can_construct_pbpo_diagram (x:MGraph_ext.t) h_K'R' r' =
   (List.is_empty tmp |> not)
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let subgraphs = rho |> Rule.rightGraph |> MGraph_ext.subGraphs in
   Printf.sprintf "total nb subgraphs : %d " (subgraphs |> List.length) |> print_endline;
@@ -161,7 +161,7 @@ let calculateDXR (x:MGraph_ext.t) (rl:Rule.t) : (GraphHomomorphism.t * GraphHomo
 
  
 let%expect_test "icgt25_example_32" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.qiu_2025_ex32 in
   calculateDXR x.x rho  
   |>
@@ -175,7 +175,7 @@ let%expect_test "icgt25_example_32" =
   |}]
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   calculateDXR x.x rho 
   |>
@@ -196,7 +196,7 @@ let%expect_test "" =
 
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;3 ] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;3 ] [(1,"f",3,2);(3,"b",3,5) ]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
   calculateDXR x.x rho 
   |>
@@ -239,7 +239,7 @@ let double_pullback_diagram_holds rho (phi:Homo.t Homo.GraphHomoMap.t) (h_k'r', 
     MGraph_ext.equal pb_obj1 pb_obj2 *)
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let drx = calculateDXR x.x rho in
   let (h_k'r', h_k'k) = List.nth drx 0 in
@@ -400,7 +400,7 @@ let generate_all_phiX (x:MGraph_ext.t) rho : (Homo.t Homo.GraphHomoMap.t) list =
    ) combinations 
  
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   let phis = generate_all_phiX x.x rho in
   List.iteri (fun i phiX ->
@@ -470,7 +470,7 @@ let%expect_test "" =
 
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
   let drx = calculateDXR x.x rho in
   let phis = generate_all_phiX x.x rho in
@@ -513,7 +513,7 @@ let is_x_non_increasing_rule_forSomePhi x rho =
   List.exists (is_x_non_increasing_rule x.x rho) phis
 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;2;3] [(1,"a",2,1);(2,"a",3,2)]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.bruggink_2014_ex_4_rl_1 in
   (* let drx = calculateDXR x.x rho in *)
   let phis = generate_all_phiX x.x rho in
@@ -524,7 +524,7 @@ let%expect_test "" =
 
 (* 
 let%expect_test "" = 
-  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None} in
+  let x = { x=MGraph_ext.fromList [1;3] [(1,"f",3,2);(3,"b",3,5) ]; fx = None;name="";description=""} in
   let rho = ConcretGraphRewritingSystems.plump_1995_ex4_1.grs |> List.hd in
   let phis = generate_all_phiX x.x rho in
   is_x_non_increasing_rule x.x rho (List.nth phis 0) |> Printf.sprintf "is x non increasing : %b\n" |> print_endline; 
@@ -623,7 +623,10 @@ let%expect_test "" =
   let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
           fx = Some (Homo.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]) } in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]);
+          name="";
+          description="";
+           } in
   let g = MGraph_ext.fromList [1;2;3;4;7;6] 
     [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2);
         (7,"a",1,4);(2,"a",6,5)
@@ -651,7 +654,8 @@ let%expect_test "" =
     [1;2] [(1,"node",1,1);(2,"node",2,2)]
     [1;3] [(1,"node",1,1);(3,"node",3,2);(1,"edge",3,3);]
     [(1,1);(2,3)] [(1,1);(2,2)]  in
-  let x = {x; fx = Some h_x_f} in
+  let x = {x; fx = Some h_x_f;name="";description=""
+  } in
   let g = ConcretGraphRewritingSystems.endrullis_2024_exd3_r1l |> Homo.codom in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
@@ -692,7 +696,7 @@ let%expect_test "" =
     [1;2] [(1,"node",1,1);(2,"node",2,2)]
     [1;3] [(1,"node",1,1);(3,"node",3,2);(1,"edge",3,3);]
     [(1,1);(2,3)] [(1,1);(2,2)]  in
-  let x = {x; fx = Some h_x_f} in
+  let x = {x; fx = Some h_x_f;name="";description=""} in
   let g = ConcretGraphRewritingSystems.endrullis_2024_exd3_r1r |> Homo.codom in
   let occs,occs_x_forbiddened, occs_x_not_forbiddened = generate_occs_with_forbidden_contexts x g in
   Printf.sprintf "%d occs" (List.length occs) |> print_endline;
@@ -782,7 +786,7 @@ let%expect_test "" =
           fx = Some (Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]) } in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]); name="";description=""} in
   let mxs = generate_mxs x rho in
   let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
    String.concat "next mx\n" tmp
@@ -806,7 +810,7 @@ let%expect_test "" =
           fx = Some (Homo.fromList 
           [1;2;3] [(1,"a",3,1);(3,"a",2,2)]
           [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
-          [(1,1);(2,2);(3,3)] [(1,1);(2,2)])} in
+          [(1,1);(2,2);(3,3)] [(1,1);(2,2)]);name=""; description=""} in
   let mxs = generate_mxs x rho in
   Printf.sprintf "|mxs| = %d\n" (List.length mxs) |> print_endline;
   let (tmp:string list) = List.map Homo.toStr_GraphHomoMap mxs in 
@@ -988,7 +992,7 @@ let%expect_test "" =
    String.concat "next mf\n" tmp
    |> print_endline;
   let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-   fx = Some h_x_f } in
+   fx = Some h_x_f;name="";description=""} in
   let mxs = generate_mxs x rho in
   let mx = List.hd mxs in
   let mfs_filtered = List.filter (predictable_cond2 x rho mx) mfs in
@@ -1141,7 +1145,7 @@ let%expect_test "" =
     [1;2;3] [(1,"a",3,1);(3,"c",3,3);(3,"a",2,2)]
     [(1,1);(2,2);(3,3)] [(1,1);(2,2)]  in
   let x = {x = MGraph_ext.fromList [1;2;3] [(1,"a",3,1);(3,"a",2,2)]; 
-    fx = Some h_x_f } in
+    fx = Some h_x_f;name="";description="" } in
   let predictable = isPredictable x rho in
   (* print_endline "main func test"; *)
   Printf.sprintf "%b" predictable 

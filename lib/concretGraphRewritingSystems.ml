@@ -6,7 +6,7 @@ type named_grs = {
   name : string;
   monic_matching : bool;  
 }
-
+let get_name named_grs = named_grs.name
 type problem = {
   witnesses: (MGraph.Graph.t * Grs.RuleSet.t) list;
   rules : Grs.RuleSet.t;
@@ -50,7 +50,7 @@ let r1r =
   [1;2] [(1,"e",2,1)]
   [(1,1);(2,2)] []
 let r1 = Grs.fromHomos r1l r1r
-let endrullis_2024_ex6_2 = fromRulesListAndName [r1] "endrullis_2024_ex6_2" ~monic_matching:true
+let endrullis_2024_ex6_2 = fromRulesListAndName [r1] "endrullis24_ex6_2" ~monic_matching:true
  let endrullis_2024_ex6_2_problem =  pbFromList [r1] 
 (*********************
   Endrullis_2023_ex_6.3
@@ -71,7 +71,7 @@ let rhv = [(1,1);(2,2)]
 let rhe = []
 
 let endrullis_2023_ex6_3_rule1 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
-let endrullis_2024_ex6_3 = fromRulesListAndName [endrullis_2023_ex6_3_rule1] "endrullis_2024_ex6_3" ~monic_matching:true
+let endrullis_2024_ex6_3 = fromRulesListAndName [endrullis_2023_ex6_3_rule1] "endrullis24_ex6_3" ~monic_matching:true
 let endrullis_2023_ex6_3 = pbFromList [endrullis_2023_ex6_3_rule1]
 
   
@@ -95,7 +95,7 @@ let rhe = []
 
 let endrullis_2023_ex6_4_rule1 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
 let endrullis_2023_ex6_4 = pbFromList [endrullis_2023_ex6_4_rule1] 
-(* let endrullis_2024_ex6_4 = fromRulesListAndName [endrullis_2023_ex6_4_rule1] "endrullis_2024_ex6_4_not_supported" ~monic_matching:true *)
+(* let endrullis_2024_ex6_4 = fromRulesListAndName [endrullis_2023_ex6_4_rule1] "endrullis24_ex6_4_not_supported" ~monic_matching:true *)
   *)
 
 (*********************
@@ -114,7 +114,7 @@ let endrullis_2024_exd3_r1r =
 let endrullis_2024_exd3_r1 = Grs.fromHomos endrullis_2024_exd3_r1l endrullis_2024_exd3_r1r
 
 let endrullis_2024_exd3_problem = pbFromList [endrullis_2024_exd3_r1] 
-let endrullis_2024_exd3 = fromRulesListAndName [endrullis_2024_exd3_r1] "endrullis_2024_exd3" ~monic_matching:false
+let endrullis_2024_exd3 = fromRulesListAndName [endrullis_2024_exd3_r1] "endrullis24_ex_d3" ~monic_matching:false
 
 
 (*********************
@@ -144,7 +144,7 @@ let r2r =
   [(1,1);(2,2)] []
 let r2 = Grs.fromHomos r2l r2r
 
-let overbeek_2024_ex5d3 = fromRulesListAndName [r1;r2] "overbeek_2024_ex5d3" ~monic_matching:true 
+let overbeek_2024_ex5d3 = fromRulesListAndName [r1;r2] "overbeek24_ex_5d3" ~monic_matching:true 
 
 
 (*********************
@@ -166,7 +166,7 @@ let rhv = [(1,1);(2,2)]
 let rhe = [(1,1)]
 
 let overbeek_2024_ex5d5_rule = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
-let overbeek_2024_ex5d5 = fromRulesListAndName [overbeek_2024_ex5d5_rule] "overbeek_2024_ex5d5" ~monic_matching:true
+let overbeek_2024_ex5d5 = fromRulesListAndName [overbeek_2024_ex5d5_rule] "overbeek24_ex_5d5" ~monic_matching:true
 (* 
 
 (*********************
@@ -226,7 +226,7 @@ let r2 = Grs.fromHomos r2l r2r
 let overbeek_2024_ex5d6 =  fromRulesListAndName [
   r1;
   r2
-  ] "overbeek_2024_ex5d6"
+  ] "overbeek24_ex_5d6"
 
 
 (*********************
@@ -264,21 +264,21 @@ let plump20183r2 = Grs.fromLists kvs kes lvs les rvs res lhv lhe rhv rhe
 let plump_1995_ex3_8 =  fromRulesListAndName [
   r1;
   r2
-  ] "plump_1995_ex3_8"
+  ] "plump95_ex3d8"
 
 let plump_2018_ex3 =  fromRulesListAndName [
   r1;
   r2
-  ] "plump_2018_ex3"
+  ] "plump18_ex3"
 let endrullis_2024_exd1 =  fromRulesListAndName [
   r1;
   r2
-  ] "endrullis_2024_exd1"
+  ] "endrullis24_exd1"
 
 let overbeek_2024_ex5d8 =  fromRulesListAndName [
   r1;
   r2
-  ] "overbeek_2024_ex5d8"
+  ] "overbeek24_ex5d8"
   
 (*********************
   plump_1995_ex4_1     
@@ -313,7 +313,7 @@ let r2 = Grs.fromHomos r2l r2r
 let plump_1995_ex4_1 =  fromRulesListAndName [
   r1;
   r2
-  ] "plump_1995_ex4_1"
+  ] "plump95_ex4d1"
   ~monic_matching:true
 
 let plump_1995_ex4_1_problem =  pbFromList [
@@ -435,8 +435,8 @@ let rp9 =
 let r9 = Grs.fromHomos lp9 rp9
 
 let plump_2018_fig10_problem = pbFromList [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] 
-let plump_2018_fig10 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump_2018_fig10"
-let plump_2018_ex5 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump_2018_ex5"
+let plump_2018_fig10 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump18_fig10"
+let plump_2018_ex5 = fromRulesListAndName [r1;r2;r3;r4;r5;r6;r7;r8;r9 ] "plump18_ex5"
 (*********************
   bruggink_2015_ex4
 *****************************)
@@ -494,9 +494,9 @@ let r2 = Grs.fromHomos lp2 rp2
 let r3 = Grs.fromHomos lp3 rp3
 let r4 = Grs.fromHomos lp4 rp4
 let bruggink_2015_ex4_problem =  pbFromList [r1;r2;r3;r4]
-let bruggink_2015_ex4 = fromRulesListAndName [r1;r2;r3;r4]"bruggink_2015_ex4"
-let bruggink_2015_ex4_rules_2_3_4 =  fromRulesListAndName  [r2;r3;r4] "bruggink_2015_ex4_r234"
-let bruggink_2015_ex4_r34 =  fromRulesListAndName  [r3;r4]  "bruggink_2015_ex4_r34"
+let bruggink_2015_ex4 = fromRulesListAndName [r1;r2;r3;r4]"bruggink15_ex4"
+let bruggink_2015_ex4_rules_2_3_4 =  fromRulesListAndName  [r2;r3;r4] "bruggink15_ex4_r234"
+let bruggink_2015_ex4_r34 =  fromRulesListAndName  [r3;r4]  "bruggink15_ex4_r34"
 
 
 
@@ -556,8 +556,8 @@ let r2 = Grs.fromHomos lp2 rp2
 let r3 = Grs.fromHomos lp3 rp3
 let r4 = Grs.fromHomos lp4 rp4
 let bruggink_2015_ex5_problem =  pbFromList [r1;r2;r3;r4]  
-let bruggink_2015_ex5 =  fromRulesListAndName  [r1;r2;r3;r4]  "bruggink_2015_ex5"
-let bruggink_2015_ex5_rules_3_4 =  fromRulesListAndName  [r3;r4] "bruggink_2015_ex5_r34"
+let bruggink_2015_ex5 =  fromRulesListAndName  [r1;r2;r3;r4]  "bruggink15_ex5"
+let bruggink_2015_ex5_rules_3_4 =  fromRulesListAndName  [r3;r4] "bruggink15_ex5_r34"
 
 
 (*********************
@@ -652,9 +652,9 @@ let r4 = Grs.fromHomos lp4 rp4
 let r5 = Grs.fromHomos lp5 rp5
 let r6 = Grs.fromHomos lp6 rp6
 let bruggink_2015_ex6_problem =  pbFromList [r1;r2;r3;r4;r5;r6] 
-let bruggink_2015_ex6 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "bruggink_2015_ex6"
-let endrullis_2024_exd2 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "endrullis_2024_exd2"
-let bruggink_2015_ex6_rules_2_3_4_5_6 =  fromRulesListAndName  [r2;r3;r4;r5;r6] "bruggink_2015_ex6_r23456"
+let bruggink_2015_ex6 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "bruggink15_ex6"
+let endrullis_2024_exd2 =  fromRulesListAndName  [r1;r2;r3;r4;r5;r6] "endrullis24_exd2"
+let bruggink_2015_ex6_rules_2_3_4_5_6 =  fromRulesListAndName  [r2;r3;r4;r5;r6] "bruggink15_ex6_r23456"
 
 let lp0 =
   Homo.fromList   
@@ -670,7 +670,7 @@ let rp0 =
 
 let r0 = Grs.fromHomos lp0 rp0
 
-let bruggink_2015_ex6_modified =   fromRulesListAndName  [r0;r1;r2;r3;r4;r5;r6] "bruggink_2015_ex6_modified"
+let bruggink_2015_ex6_modified =   fromRulesListAndName  [r0;r1;r2;r3;r4;r5;r6] "bruggink15_ex6_modified"
 
 (*********************
   bruggink_2014_ex_1
@@ -685,7 +685,7 @@ let r1 =  Homo.fromList
   [(1,1);(2,2)] []
 let bruggink_2014_ex1_rl = Grs.fromHomos l1 r1
 
-let bruggink_2014_ex1 =  fromRulesListAndName [bruggink_2014_ex1_rl]"bruggink_2014_ex1"
+let bruggink_2014_ex1 =  fromRulesListAndName [bruggink_2014_ex1_rl]"bruggink14_ex1"
 
 (*********************
   bruggink_2014_ex_4
@@ -700,8 +700,8 @@ let bruggink_2014_ex_4_r = Homo.fromList
   [(1,1);(2,2)] []
 let bruggink_2014_ex_4 = Grs.DPOrule.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
 let bruggink_2014_ex_4_rl_1 = Grs.DPOrule.fromHomos bruggink_2014_ex_4_l bruggink_2014_ex_4_r
-let bruggink_2014_ex6 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2014_ex_4_and_6"
-let bruggink_2015_ex2 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink_2015_ex2"
+let bruggink_2014_ex6 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink14_ex_4_and_6"
+let bruggink_2015_ex2 =  fromRulesListAndName [bruggink_2014_ex_4] "bruggink15_ex2"
 let bruggink_2014_ex4_problem =  pbFromList [bruggink_2014_ex_4]
 
 
@@ -788,12 +788,12 @@ let bruggink_2014_ex5 = fromRulesListAndName [
   bruggink_2014_ex_5_rl3;
   bruggink_2014_ex_5_rl4
   ]
-   "bruggink_2014_ex5"
+   "bruggink14_ex5"
 let bruggink_2014_ex5_rule_1_and_2_only = fromRulesListAndName [
     bruggink_2014_ex_5_rl1;
     bruggink_2014_ex_5_rl2;
     ]
-   "bruggink_2014_ex5_r12"
+   "bruggink14_ex5_r12"
   
 let plump_2018_ex4 =  fromRulesListAndName [
   bruggink_2014_ex_5_rl1;
@@ -801,7 +801,7 @@ let plump_2018_ex4 =  fromRulesListAndName [
   bruggink_2014_ex_5_rl3;
   bruggink_2014_ex_5_rl4
   ]
-   "plump_2018_ex4"
+   "plump18_ex4"
 (*********************
   bruggink_2014_ex_6 ??? quelle est la diff avec ex 4
 *****************************)
@@ -853,8 +853,8 @@ let sm = Grs.fromHomos sml smr
 let ar = Grs.fromHomos arl arr
 let ci = Grs.fromHomos cil cir
 let bruggink_2014_ad_hoc_routing_protocol_problem =  pbFromList  [sm;ar;ci]
-let bruggink_2014_ad_hoc_routing_protocol = fromRulesListAndName [sm;ar;ci] "bruggink_2014_ad_hoc_routing_protocol"
-let bruggink_2014_ad_hoc_routing_protocol_rules_sm_ar_only = fromRulesListAndName [sm;ar] "bruggink_2014_ad_hoc_routing_protocol_rules_ar_ci_only"
+let bruggink_2014_ad_hoc_routing_protocol = fromRulesListAndName [sm;ar;ci] "bruggink14_ad_hoc_routing_protocol"
+let bruggink_2014_ad_hoc_routing_protocol_rules_sm_ar_only = fromRulesListAndName [sm;ar] "bruggink14_ad_hoc_routing_protocol_rules_ar_ci_only"
 
 (*********************
 exemple  : bonfante_2023_main_ex_follow
@@ -902,9 +902,9 @@ let r2_r = Homo.fromList
 let plump_2018_ex6_r2 = Grs.fromHomos r2_l r2_r
 
 let plump_2018_ex6_problem =  pbFromList [plump_2018_ex6_r1; plump_2018_ex6_r2]
-let plump_2018_ex6 = fromRulesListAndName [plump_2018_ex6_r1; plump_2018_ex6_r2] "plump_2018_ex6"
+let plump_2018_ex6 = fromRulesListAndName [plump_2018_ex6_r1; plump_2018_ex6_r2] "plump18_ex6"
 
-let plump_2018_ex6_one_rule_copy = fromRulesListAndName [plump_2018_ex6_r1] "plump_2018_ex6_one_rule_copy"
+let plump_2018_ex6_one_rule_copy = fromRulesListAndName [plump_2018_ex6_r1] "plump18_ex6_one_rule_copy"
 
 
 (* endrullis ex 6.9 variant *)
@@ -922,8 +922,8 @@ let r1_r = Homo.fromList
 
 let plump_2018_ex6_variant_r1 = Grs.fromHomos r1_l r1_r
 (* let plump_2018_ex6_variant_problem =  pbFromList [plump_2018_ex6_variant_r1] *)
-let plump_2018_ex6_variant = fromRulesListAndName [plump_2018_ex6_variant_r1] "plump_2018_ex6_one_rule_copy_with_discret_interface"
-(* let plump_2018_ex6_variant_monic = fromRulesListAndName ~monic_matching:true [plump_2018_ex6_variant_r1] "plump_2018_ex6_variant_monic" *)
+let plump_2018_ex6_variant = fromRulesListAndName [plump_2018_ex6_variant_r1] "plump18_ex6_rule_copy_variant"
+(* let plump_2018_ex6_variant_monic = fromRulesListAndName ~monic_matching:true [plump_2018_ex6_variant_r1] "plump18_ex6_variant_monic" *)
 
 
 (* Example 45 *)
@@ -999,7 +999,7 @@ let metivier_1995_majAB_rules_2_5_7_8_only_bis_monic = fromRulesListAndName [
     r5;
     r7;
     r8
-    ] "metivier_1995_majAB_rules_2_5_7_8_only_bis_monic" ~monic_matching:true
+    ] "metivier95_majAB_rules_2_5_7_8_only_bis_monic" ~monic_matching:true
 
 let metivier_1995_majAB_rules_2_5_7_8_only_bis = fromRulesListAndName [
     (* _r1; *)
@@ -1007,7 +1007,7 @@ let metivier_1995_majAB_rules_2_5_7_8_only_bis = fromRulesListAndName [
     r5;
     r7;
     r8
-    ] "metivier_1995_majAB_rules_2_5_7_8_only_bis"
+    ] "metivier95_majAB_rules_2_5_7_8_only_bis"
 
 let r1l = Homo.fromList 
 [1;2] []
@@ -1152,10 +1152,10 @@ let _r15 = Grs.fromHomos r15l r15r
 let metivier_1995_majAB_rules_1_2_5_7_8_only = fromRulesListAndName [
     (* _r1; *)
     _r2;_r5;_r7;_r8
-    ] "metivier_1995_majAB_rules_1_2_5_7_8_only" ~monic_matching:true
+    ] "metivier95_majAB_rules_1_2_5_7_8_only" ~monic_matching:true
 let metivier_1995_majAB = fromRulesListAndName [
   _r1;_r2;_r3;_r4;_r5;_r6;_r7;_r8;_r9;_r10;_r11;_r12;_r13;_r14;_r15
-  ] "mametivier_1995_majAB" ~monic_matching:true
+  ] "mametivier95_majAB" ~monic_matching:true
 (*********************
   simple relabeling 
 *****************************)
@@ -1331,23 +1331,23 @@ let r6 = Grs.fromHomos r6l r6r
 let nonwf_n3_modified = fromRulesListAndName [r1;r2;r3;r4;r5;r6] "nonwf_n3_modified" *)
 
 
-let grss =  
+let available_graph_rewriting_systems =  
   [bruggink_2014_ex1;
   bruggink_2014_ex5; 
-  bruggink_2014_ex5_rule_1_and_2_only; 
+  (* bruggink_2014_ex5_rule_1_and_2_only;  *)
   bruggink_2014_ex6;
   bruggink_2014_ad_hoc_routing_protocol;
-  bruggink_2014_ad_hoc_routing_protocol_rules_sm_ar_only;
+  (* bruggink_2014_ad_hoc_routing_protocol_rules_sm_ar_only; *)
   ] @ [
     bruggink_2015_ex2;
   bruggink_2015_ex4;
-  bruggink_2015_ex4_rules_2_3_4;
-  bruggink_2015_ex4_r34;
+  (* bruggink_2015_ex4_rules_2_3_4;
+  bruggink_2015_ex4_r34; *)
   bruggink_2015_ex5;
-  bruggink_2015_ex5_rules_3_4;
+  (* bruggink_2015_ex5_rules_3_4; *)
   bruggink_2015_ex6;
-  bruggink_2015_ex6_rules_2_3_4_5_6;
-  bruggink_2015_ex6_modified;
+  (* bruggink_2015_ex6_rules_2_3_4_5_6;
+  bruggink_2015_ex6_modified; *)
   ] @ [
   endrullis_2024_ex6_2;
   endrullis_2024_ex6_3;
@@ -1370,13 +1370,13 @@ let grss =
 ] @ [  
   metivier_1995_majAB;
   metivier_1995_majAB_rules_1_2_5_7_8_only;
-  metivier_1995_majAB_rules_2_5_7_8_only_bis;
-  metivier_1995_majAB_rules_2_5_7_8_only_bis_monic
+  (* metivier_1995_majAB_rules_2_5_7_8_only_bis;
+  metivier_1995_majAB_rules_2_5_7_8_only_bis_monic *)
 ] @[
-  nonwf_n3_cube;
+  (* nonwf_n3_cube; *)
   nonwf_n3;
-  nonwf_n3_rules_1_2_only;
-  nonwf_n3_modified
+  (* nonwf_n3_rules_1_2_only;
+  nonwf_n3_modified *)
 ] @ [
   overbeek_2024_ex5d3 ;
   overbeek_2024_ex5d5;

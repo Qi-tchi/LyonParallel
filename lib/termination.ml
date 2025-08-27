@@ -591,7 +591,7 @@ let isX x ~rules =
 
   (* Complete version *)
   Grs.RuleSet.for_all 
-    ( let x:Ruler_graph.rulerGraph = {x = x; fx = None} in
+    ( let x:Ruler_graph.rulerGraph = {x = x; fx = None;name="";description=""} in
       Subgraph_counting_forbidden_contexts.is_x_non_increasing_rule_forSomePhi x) 
     rules
 
