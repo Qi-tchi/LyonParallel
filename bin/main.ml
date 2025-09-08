@@ -1,6 +1,8 @@
 open LyonParallel
 (* File-: simple_repl.ml *)
 let time = ref 0.
+let nb_successful_simplifications = ref 0
+let traces = ref ""
 let (log:(GraphRewritingSystem.t list
 * string
 * Semiring.semiring_t
@@ -11,6 +13,7 @@ let systems = ConcretGraphRewritingSystems.available_graph_rewriting_systems
 let (approach:Parallel.meta_stragety_t list ref) = ref []
 let (timeout : float option ref) = ref None
 let (system : ConcretGraphRewritingSystems.named_grs option ref) = ref None
+let ruler_graph = ref None
 let (system_current : ConcretGraphRewritingSystems.named_grs option ref) = ref None
 let (ran:bool ref) = ref false
 let reset_sol_file = ref true
@@ -19,6 +22,18 @@ let undefined_command_msg cmd =
    (Printf.sprintf "Undefined command [%s].\n" cmd)
 let help_msg () = (Printf.sprintf "Type 'help' for help.")
 
+let reset_all () =
+  time := 0.;
+  nb_successful_simplifications := 0;
+  traces := "";
+  (* log := []; *)
+  (* approach := []; *)
+  timeout := None;
+  system := None;
+  system_current := None
+  (* ran := false *)
+  (* reset_sol_file := true; *)
+  (* Printf.printf "All reset.\n" *)
 let cmd_select_processing n cmd = 
   try 
     let res = `System (n|> int_of_string) in
@@ -33,6 +48,8 @@ let cmd_select_system_of_name_processing name cmd =
     res
   with _ -> `Undefined (undefined_command_msg cmd)
 
+let cmd_select_ruler_graph_processing name = 
+  `select_ruler_graph name
 
 let cmd_reset_strategies () = 
   approach := [];
@@ -41,12 +58,10 @@ let cmd_reset_strategies () =
     Printf.printf "
       Original System: %s\n
       Remaining Rules: %s\n
-      Log:%s\n
-      Involved Strategies:%s\n
-      Strategies: %s\n
-      Terminating: %s\n
-      Reset_solution_file_next_run: %b\n
-      Resolution Time: %f\n" 
+      Terminating : %s\n
+      Total Resolution Time : %f\n
+      Traces : %s\n
+      " 
     (* original system *)
     (match !system with
     | None -> "no system selected" 
@@ -66,7 +81,7 @@ let cmd_reset_strategies () =
     |None, None -> "[]"
     |_ -> failwith __LOC__)
     (* log *)
-    (match !system with
+    (* (match !system with
     | None -> ""
     | Some grs -> List.map 
       (fun (eliminated_rules, filename, _, _) ->
@@ -80,9 +95,9 @@ let cmd_reset_strategies () =
         filename)
       !log
     |> String.concat "\n"
-    |> Printf.sprintf "\n%s")
+    |> Printf.sprintf "\n%s") *)
     (* involed strategies *)
-    (List.map (fun (_, _, semiring, integer) ->
+    (* (List.map (fun (_, _, semiring, integer) ->
       match semiring with
       |Semiring.Arctic -> if integer then "a" else "A"
       |Semiring.Tropical ->if integer then "t" else "T"
@@ -91,20 +106,22 @@ let cmd_reset_strategies () =
     !log 
     |> StringSet.of_list
     |> StringSet.elements
-    |> String.concat "")
+    |> String.concat "") *)
     (* Strategies *)
-    (List.map Parallel.meta_stragety_to_str !approach
+    (* (List.map Parallel.meta_stragety_to_str !approach
     |> String.concat " || "
-    |> Printf.sprintf "[%s]")
+    |> Printf.sprintf "[%s]") *)
     (* termination *)
     (match !system_current with
      | None -> "unknown"
      | Some grs -> if List.length grs.grs = 0 then "yes" else
       "unknown")
     (* reset solution file *)
-    !reset_sol_file
+    (* !reset_sol_file *)
     (* resolution time *)
     !time 
+    (* traces *)
+    !traces
 let cmd_run () = 
   begin
     match !system_current, !approach, !timeout with
@@ -139,6 +156,7 @@ let cmd_add_strategy s =
   Printf.printf "timeout is set to %f seconds.\n" (Option.get !timeout)
 
 let cmd_select_system n =
+  (* to do updated *)
   system := Some (List.nth systems n);
   system_current := Some (List.nth systems n);
   Printf.printf "System %d.%s selected.\n" n (List.nth systems n).name
@@ -147,13 +165,23 @@ let cmd_select_system n =
 
 let cmd_select_system_of_name name =
   let s = match List.find_opt (fun x -> String.equal name (ConcretGraphRewritingSystems.get_name x)) systems with
-          |None -> failwith (Printf.sprintf "No system named %s" name)
-          |Some x -> Some x in
-  system := s;
-  system_current := s;
-  Printf.printf "System \"%s\" selected.\n" name
-  ;time := 0.;
-  log := []
+    |None -> failwith (Printf.sprintf "No system named %s" name)
+    |Some x -> Some x in
+      begin 
+        reset_all ();
+        system := s;
+        system_current := s;
+        Printf.printf "System \"%s\" selected.\n" name
+        ;time := 0.;
+        log := []
+      end
+
+let cmd_select_ruler_graph name =
+  let rg = match List.find_opt (fun x -> String.equal name (x |> Ruler_graph.get_name)) Ruler_graph.ruler_graphs with
+        |None -> failwith (Printf.sprintf "No system named %s" name)
+        |Some x -> Some x in 
+  ruler_graph := rg;
+  Printf.printf "Ruler-graph \"%s\" selected.\n" name
 
 let cmd_systems () = 
   let sys_names = List.mapi (fun i (s:ConcretGraphRewritingSystems.named_grs) -> Printf.sprintf "%d.%s" i s.name) systems in
@@ -260,11 +288,56 @@ let cmd_try_type_graph system auto_defaut_strategies time =
   (* cmd_showme (); *)
 ;;
 (*iterative version of cmd_try_type_graph*)
-let cmd_type_graph auto_defaut_strategies time =
-  cmd_timeout time;
+let cmd_type_graph auto_defaut_strategies userdefined_timeout =
+  cmd_timeout userdefined_timeout;
   cmd_reset_strategies ();
   List.iter cmd_add_strategy auto_defaut_strategies;
-  cmd_run ();
+  begin
+    match !system_current, !approach, !timeout with
+    |_,[],_ -> Printf.printf "You need to add some strategies before\nType 'help' for help.\n"; 
+    |None,_,_ -> Printf.printf "You need to select a rewriting system before\nType 'help' for help.\n"; 
+    |Some grs, metas, Some t -> 
+      begin
+        let start_time = Unix.gettimeofday () in
+        ran := true;
+        begin
+          match Parallel.parallel_solving_with_meta_strategy ~grs:(ref grs) ~metas 
+          ~timeout:t ~reset_sol_file:!reset_sol_file with
+          | grs, log_local ->
+            system_current := Some grs;
+            log := !log @ log_local 
+        end;
+        reset_sol_file := false;
+        (*below : trace generation *)
+        (* let pb = ConcretGraphRewritingSystems.named_grs_to_problem grs in *)
+                    (* let all_rules = ConcretGraphRewritingSystems.rules_of_problem pb in *)
+                    (* let indices_of_remaining_rules, indices_of_removed_rules = List.partition
+                          (fun i -> 
+                            List.mem (List.nth all_rules i) grs.grs
+                          ) (List.init (List.length all_rules) (fun x -> x)) in *)
+                    (* let str_remaining_rules = if List.is_empty indices_of_remaining_rules then "None" else (indices_of_remaining_rules |> List.map string_of_int |> String.concat ";") in
+                    let str_removed_rules = if List.is_empty indices_of_removed_rules then "None" else (indices_of_removed_rules |> List.map string_of_int |> String.concat ";") in *)
+                     traces := Printf.sprintf 
+                    "%s\n  ======== successful simplifications : number %d  ==========\n  Method: Type graph Method \n  %s\n  Resolution time: %f seconds\n
+                  "
+                  !traces 
+                  (nb_successful_simplifications := !nb_successful_simplifications + 1;!nb_successful_simplifications)
+                   (
+                    let ic = open_in "tmp/sol.sol" in
+                    In_channel.input_all ic
+                    )
+                (* (indices_of_removed_rules |> List.map string_of_int |> String.concat ";"); *)
+                  (let resol_time = Unix.gettimeofday () -. start_time in 
+                      time := !time +. resol_time
+                      ; resol_time)
+      end;
+    (* cmd_recap () *)
+    | _ -> 
+      begin 
+        Printf.printf "Something is wrong\n Loc %s" __LOC__; 
+      end
+    end
+  
   (* cmd_showme (); *)
 ;;
 
@@ -284,7 +357,7 @@ let cmd_try_subgraph_counting_no_forbidden_context system =
   (* todo : unify two systems *)
   let system = List.nth systems system in
   let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
-  let res = Termination.isTerminating pb in
+  let _, res = Termination.isTerminating pb in
   let _ = Termination.interpret res in
   ()
 ;;
@@ -293,9 +366,51 @@ let cmd_subgraph_counting_no_forbidden_context () =
    match !system_current with
   | None -> failwith "No system selected"
   | Some system ->
-  let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
-  let res = Termination.isTerminating pb in
-  system_current := Some (ConcretGraphRewritingSystems.fromRulesListAndName (ConcretGraphRewritingSystems.rules_of_problem res) system.name);
+    begin
+      let start_time = Unix.gettimeofday () in
+      let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
+      let ruler_graph, res = Termination.isTerminating pb in
+      (* system_current := Some (ConcretGraphRewritingSystems.fromRulesListAndName (ConcretGraphRewritingSystems.rules_of_problem res) system.name); *)
+      let all_rules = ConcretGraphRewritingSystems.rules_of_problem pb in
+      let remaining_rules = (ConcretGraphRewritingSystems.rules_of_problem res) in
+      system_current := Some (ConcretGraphRewritingSystems.fromRulesListAndName remaining_rules system.name);
+      let indices_of_remaining_rules, indices_of_removed_rules = List.partition
+        (fun i -> 
+          List.mem (List.nth all_rules i) remaining_rules
+        ) (List.init (List.length all_rules) (fun x -> x)) in
+      let str_remaining_rules = if List.is_empty indices_of_remaining_rules then "None" else (indices_of_remaining_rules |> List.map string_of_int |> String.concat ";") in
+      let str_removed_rules = if List.is_empty indices_of_removed_rules then "None" else (indices_of_removed_rules |> List.map string_of_int |> String.concat ";") in
+      (* let remaining_rules = ConcretGraphRewritingSystems.rules_of_problem res in
+      let indices_of_removed_rules_opt = List.mapi
+        (fun i r ->
+          if List.mem r all_rules then Some i else None
+        ) remaining_rules in 
+      let indices_of_removed_rules = List.filter_map 
+        (fun x -> if Option.is_some x then x else None) 
+        indices_of_removed_rules_opt in *)
+      system_current := Some (ConcretGraphRewritingSystems.fromRulesListAndName (ConcretGraphRewritingSystems.rules_of_problem res) system.name);
+      match ruler_graph with
+        | None -> ()
+        | Some rg -> begin
+          traces := Printf.sprintf 
+            "%s\n
+            ======== successful simplifications : number %d ==========\n  Method: Subgraph counting without forbidden context\n  rule graph : %s\n  Removed rules indices: %s\n  Remaining rules indices: %s\n  Resolution time: %f seconds\n
+          "
+          !traces  
+          (nb_successful_simplifications := !nb_successful_simplifications + 1;!nb_successful_simplifications)
+          (* this method use ruler-graph without forbidden context *)
+          ( 
+            MGraph.toStr (rg |> Ruler_graph.get_x)
+          )
+          (* (MGraph.toStr (Option.get !ruler_graph |> Ruler_graph.get_x)) *)
+          str_removed_rules 
+          str_remaining_rules
+        (* (indices_of_removed_rules |> List.map string_of_int |> String.concat ";"); *)
+          (let resol_time = Unix.gettimeofday () -. start_time in 
+              time := !time +. resol_time
+              ; resol_time)
+      end;
+  end
 ;; 
 
 let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
@@ -305,7 +420,7 @@ let cmd_try_subgraph_counting_one_forbidden_context (system,rulergraph) =
   match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context rulergraph system with
   | true, report,_ -> Printf.sprintf "  *** Termination proved ! *** \n %s\ndescription of the ruler-graph: %s" report rulergraph.description |> print_endline
   | false, report,_ -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
-;;
+(* ;;
 let cmd_subgraph_counting_one_forbidden_context (name_of_rulergraph) =
   (* todo : unify two systems *)
   match !system_current with
@@ -323,6 +438,53 @@ let cmd_subgraph_counting_one_forbidden_context (name_of_rulergraph) =
       system_current := Some ( ConcretGraphRewritingSystems.fromRulesListAndName remained_rules (Option.get !system_current).name);
     end 
   | false, report,_ -> Printf.sprintf "  *** Termination Unknown ! *** \n %s\n" report |> print_endline
+;; *)
+
+let cmd_subgraph_counting_one_forbidden_context () =
+  (* todo : unify two systems *)
+  match !system_current with
+  | None -> failwith "No system selected"
+  | Some system -> 
+    begin
+      match !ruler_graph with
+            |None -> failwith (Printf.sprintf "Select a ruler-graph first")
+            |Some ruler_graph -> 
+              begin
+                let start_time = Unix.gettimeofday () in
+                (* let (rulergraph,_,_) = List.nth Ruler_graph.ruler_graphs rulergraph in *)
+                match Subgraph_counting_forbidden_contexts.terminating_counting_subgraph_with_forbidden_context ruler_graph system with
+                | true, _, remaining_rules -> 
+                  begin 
+                    system_current := Some ( ConcretGraphRewritingSystems.fromRulesListAndName remaining_rules (Option.get !system_current).name);
+                    (* below : generation of trace *)
+                    let pb = ConcretGraphRewritingSystems.named_grs_to_problem system in
+                    let all_rules = ConcretGraphRewritingSystems.rules_of_problem pb in
+                    let indices_of_remaining_rules, indices_of_removed_rules = List.partition
+                          (fun i -> 
+                            List.mem (List.nth all_rules i) remaining_rules
+                          ) (List.init (List.length all_rules) (fun x -> x)) in
+                    let str_remaining_rules = if List.is_empty indices_of_remaining_rules then "None" else (indices_of_remaining_rules |> List.map string_of_int |> String.concat ";") in
+                    let str_removed_rules = if List.is_empty indices_of_removed_rules then "None" else (indices_of_removed_rules |> List.map string_of_int |> String.concat ";") in
+                     traces := Printf.sprintf 
+                    "%s\n  ======== successful simplifications : number %d ==========\n  Method: Subgraph counting with one forbidden context\n  rule graph : %s\n  Removed rules indices: %s\n  Remaining rules indices: %s\n  Resolution time: %f seconds\n
+                  "
+                  !traces  
+                  (nb_successful_simplifications := !nb_successful_simplifications + 1;!nb_successful_simplifications)
+                  (* this method use ruler-graph without forbidden context *)
+                  ( 
+                    Ruler_graph.to_str ruler_graph
+                  )
+                  (* (MGraph.toStr (Option.get !ruler_graph |> Ruler_graph.get_x)) *)
+                  str_removed_rules 
+                  str_remaining_rules
+                (* (indices_of_removed_rules |> List.map string_of_int |> String.concat ";"); *)
+                  (let resol_time = Unix.gettimeofday () -. start_time in 
+                      time := !time +. resol_time
+                      ; resol_time)
+                  end 
+                | false, report,_ -> Printf.sprintf "  *** failed ! *** \n %s\n" report |> print_endline
+              end
+  end
 ;;
 
 let handle_command cmd =
@@ -335,6 +497,7 @@ let handle_command cmd =
   | ["rulergraphs"] -> `show_ruler_graphs
   | ["select"; n] -> cmd_select_processing n cmd
   | ["select_system_by_name"; name] -> cmd_select_system_of_name_processing name cmd
+  | ["select_ruler_graph"; name] -> cmd_select_ruler_graph_processing name
   | ["reset_strategies"] -> `Reset_strategies 
   | ["showme"] -> `show_certificat
   | ["run"] -> `run
@@ -348,71 +511,11 @@ let handle_command cmd =
     `subgraph_counting_no_forbidden_context
   | "try_subgraph_counting_one_forbidden_context" :: system :: [rg]-> `try_subgraph_counting_one_forbidden_context (int_of_string system, int_of_string rg)
   (* iterative version *)
-  | "subgraph_counting_one_forbidden_context" :: [rg]-> `subgraph_counting_one_forbidden_context (rg)
+  | "subgraph_counting_one_forbidden_context" :: []-> `subgraph_counting_one_forbidden_context
   | ["recap"] -> `recap 
   | ["help"] ->
     `Print_help_msg 
-    "GRAPH REWRITING SYSTEM TERMINATION PROVER (REPL)
-───────────────────────────────────────────────────
-
-CORE COMMANDS
-  systems               - List all available graph rewriting systems
-  select <N>            - Select system by ID (e.g., `select 0`)
-  run                   - Execute added strategies on the selected system
-  recap                 - Show system status, rules left, and strategies used
-  reset_strategies      - Clear all selected strategies
-  timeout <SECONDS>     - Set max execution time (e.g., `timeout 60`)
-  showme                - Display the latest termination certificate
-  exit                  - Quit the REPL
-
-STRATEGY COMMANDS
-Add automated strategies for proving termination:
-
-1. Predefined Strategies (Shortcuts):
-   add_parallel_strategy_auto:<NAME>
-   ────────────────────────────────────────
-   Auto_total                 - Fully automatic strategy
-   Auto_total_int             - Integer coefficients (auto semiring)
-   Auto_total_int_arctic      - Integer + Arctic semiring
-   Auto_total_int_tropical    - Integer + Tropical semiring
-   Auto_total_int_arithmetic  - Integer + Arithmetic semiring
-   Auto_total_real            - Real coefficients (auto semiring)
-   Auto_total_real_arctic     - Real + Arctic semiring
-   Auto_total_real_tropical   - Real + Tropical semiring
-   Auto_total_real_arithmetic - Real + Arithmetic semiring
-
-   Example:
-   >> add_parallel_strategy_auto:Auto_total_int_arctic
-
-2. Custom Strategies (Advanced):
-   add_parallel_strategy_auto <TYPE> <SEMIRING> <MAX_SIZE> <MAX_WEIGHT> <OPTIMIZED>
-   ────────────────────────────────────────────────────────────────────────────────
-   <TYPE>       : int (discrete) | float (real numbers)
-   <SEMIRING>   : arctic | tropical | arithmetic
-   <MAX_SIZE>   : Max graph size to analyze (e.g., 10)
-   <MAX_WEIGHT> : Max weight allowed (e.g., 100)
-   <OPTIMIZED>  : true/false (enable optimizations)
-
-   Example:
-   >> add_parallel_strategy_auto int arctic 10 100 true
-
-QUICK-TEST COMMANDS
-  try_type_graph <SYS_ID> <STRATS> <TIMEOUT>  
-   - Test type graph method with semiring combo (e.g., `try_type_graph 2 ant 60`)
-   - <STRATS>: Letter combo (a=Real Arctic, A=Int Arctic, t/T= Tropical, n/N=Arithmetic)
-
-  try_subgraph_counting_no_forbidden_context <SYS_ID>  
-   - Test subgraph counting method (e.g., `try_subgraph_counting_no_forbidden_context 0`)
-
-EXAMPLES
-  1. Prove termination for system 0 with Arctic int:
-     >> select 0
-     >> add_parallel_strategy_auto:Auto_total_int_arctic
-     >> timeout 30
-     >> run
-
-  2. Try multiple semirings quickly:
-     >> try_type_graph 3 120 A N T  # Arctic(int) + Tropical(int) + Arithmetic(int)
+    "to do ...
   "
   | "add_parallel_strategy_auto" :: coefficient :: semiring :: maxSize :: maxWeight :: optimized :: [] -> 
     begin  
@@ -490,7 +593,8 @@ let rec repl () =
       | `show_ruler_graphs -> cmd_show_ruler_graphs ()
       | `System n -> cmd_select_system n
       | `Select_system_of_name name -> cmd_select_system_of_name name
-      | `show_certificat -> cmd_showme ()
+      | `select_ruler_graph name -> cmd_select_ruler_graph name
+      | `show_certificat -> cmd_showme () 
       | `run -> cmd_run ()
       |`try_type_graph (system,auto_defaut_strategies,timeout) -> 
         cmd_try_type_graph system auto_defaut_strategies timeout
@@ -511,7 +615,8 @@ let rec repl () =
       | `subgraph_counting_no_forbidden_context ->  cmd_subgraph_counting_no_forbidden_context ()
       | `try_subgraph_counting_one_forbidden_context args -> cmd_try_subgraph_counting_one_forbidden_context args
       (* iterative *)
-      | `subgraph_counting_one_forbidden_context args -> cmd_subgraph_counting_one_forbidden_context args
+      (* | `subgraph_counting_one_forbidden_context args -> cmd_subgraph_counting_one_forbidden_context args *)
+      | `subgraph_counting_one_forbidden_context -> cmd_subgraph_counting_one_forbidden_context ()
       
       
     with

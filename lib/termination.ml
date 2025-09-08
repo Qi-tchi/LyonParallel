@@ -625,21 +625,28 @@ let%expect_test "" =
   plump_2018_ex6 is injective system ? : false
 |}]
 
-let rec isTerminating (pb:problem) =
+let isTerminating (pb:ConcretGraphRewritingSystems.problem):
+  Ruler_graph.rulerGraph option * ConcretGraphRewritingSystems.problem =
   let injective_sys = RuleSet.for_all (Grs.isInjectiveRule) pb.rules in
   if not injective_sys then begin
-    print_endline "Not supported systems"; pb 
+    print_endline "Not supported systems"; None, pb 
   end else
   match Grs.RuleSet.is_empty pb.rules with 
-  |true -> pb (* if terminating *)
+  |true -> None, pb (* if terminating *)
   |false ->
       begin
         let lhsGraphs = List.map (fun r -> r |> Grs.lhs |> Homo.codom) (pb.rules |> Grs.RuleSet.elements) in
-        let subgraphs = List.map MGraph.subGraphs lhsGraphs |> List.concat in
-        try let x = List.find (isX ~rules:pb.rules) subgraphs in
+        let subgraphs = List.map MGraph.subGraphs lhsGraphs 
+            |> List.concat in
+        (* try let x = List.find (isX ~rules:pb.rules) subgraphs in
             let eliminatedRules, remainedRules = Grs.RuleSet.partition (hasStrictlyMoreOccurrencesOnleft x) pb.rules in 
             isTerminating { witnesses=(x,eliminatedRules)::pb.witnesses; rules= remainedRules}  (* new iteration *)
         with Not_found -> pb (* if no rule can be eliminated *)
+           *)  
+          try let x = List.find (isX ~rules:pb.rules) subgraphs in
+            let eliminatedRules, remainedRules = Grs.RuleSet.partition (hasStrictlyMoreOccurrencesOnleft x) pb.rules in 
+            Some (Ruler_graph.construct_ruler_graph x None "A Ruler Graph" "Description"), { witnesses=[(x,eliminatedRules)]; rules= remainedRules}
+          with Not_found -> None, pb (* if no rule can be eliminated *)
       end
 
 let interpret (pb:problem) =
@@ -652,11 +659,11 @@ let interpret (pb:problem) =
       (fun i (x,_) -> Printf.printf "X%d: \n \ \ \ %s\n" i (MGraph.toStr x))
       xs
     end
-    else
+    else 
       print_endline "termination unknown!"
   
 let isTerminatingBool pb = 
-  isTerminating pb |> (ConcretGraphRewritingSystems.isEmpty)
+  isTerminating pb |> snd |> (ConcretGraphRewritingSystems.isEmpty)
 let%expect_test "isTerminating" = 
   let bruggink_2014_example_4_l = Homo.fromList
     [1;2] [] 

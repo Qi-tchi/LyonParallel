@@ -467,7 +467,17 @@ let parallel_solving_with_meta_strategy ~grs ~metas ~timeout ~reset_sol_file =
               close_in ic;
               let n = !grs.grs |> List.length in
               let rls = List.init n (fun i -> i) in
-              let remained_rls = List.filter (fun i -> List.mem i eliminatedRules |> not) rls in
+              let remained_rls, removed_rls = List.partition (fun i -> List.mem i eliminatedRules |> not) rls in
+              (match removed_rls |> List.is_empty with 
+              | true -> ()
+              | false -> begin
+                Printf.fprintf oc 
+                  "%d rule(s) eliminated : %s \n%d rule(s) remaind : %s \n" 
+                  (List.length removed_rls)
+                  (if List.is_empty removed_rls then "None" else (List.map (fun i -> Printf.sprintf "rule %d" i) removed_rls |> String.concat ", "))
+                  (List.length remained_rls)
+                  (if List.is_empty remained_rls then "None" else (List.map (fun i -> Printf.sprintf "rule %d" i) remained_rls |> String.concat ", "))
+              end);
               if remained_rls |> List.is_empty then
                 begin
                   (* information for users *)

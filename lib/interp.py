@@ -100,8 +100,8 @@ with open(f"tmp/{sys.argv[3]}.interp", "w") as file:
         natural_numbers_list = proportional_natural_numbers(fractions_list)
         for ((c1,c2,c3), x) in zip(output,natural_numbers_list):
             file.write(f"{c1}: {x}\n")
-            
-    file.write("\nrules eliminated?:\n")
+
+    # file.write("\nrules eliminated?:\n")
     pattern = r"z_(\d+)_rl_(\d+) \(\) Bool\n\s+(true|false)"
     # Perform the match of eliminated rules
     matches = re.findall(pattern, text)

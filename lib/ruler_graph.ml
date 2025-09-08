@@ -11,7 +11,7 @@ let aa_not_in_aca =
       name = "aa_not_in_aca";
       description="the graph X has two isolated nodes: 1 2\nthe forbidden context is the graph X with an additional edge : 1 -> 2"
       } in 
-      x 
+      x
 let nn_not_in_nen =
   let x = MGraph.fromList [1;2] [] in
   let f = Homo.fromList 
@@ -22,6 +22,20 @@ let nn_not_in_nen =
     name = "the graph X has two isolated nodes: 1 2\nthe forbidden context is the graph X with an additional edge : 1 -> 2";
     description = "the graph X is a chain with two edges labeled 'a' : 1-a->3-a->2\n\nthe forbidden context is the graph X with an additional loop labeled 'c' : 3-c->3"
     } 
+let construct_ruler_graph x fx name description =
+  {x; fx; name; description}
+let get_name rg = rg.name
+let get_description rg = rg.description
+let get_x rg = rg.x
+let get_fx rg = rg.fx
+let to_str rg = 
+  Printf.sprintf "Ruler Graph: %s\nDescription: %s\nX: %s\nFX: %s\n"
+    (get_name rg)
+    (get_description rg)
+    (MGraph.toStr (get_x rg))
+    (match get_fx rg with
+     | None -> "None"
+     | Some fx -> Homo.toStr fx)
 
 (* let ruler_graphs = [
   (nn_not_in_nen, "nn_not_in_nen","the graph X has two isolated nodes: 1 2\nthe forbidden context is the graph X with an additional edge : 1 -> 2");
