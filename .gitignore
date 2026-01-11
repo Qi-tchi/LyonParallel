@@ -27,3 +27,7 @@ _build/
 *.out
 *.smt2
 *.DS_Store*
+*.idx
+*.ilg
+*.ind
+*.synctex*
